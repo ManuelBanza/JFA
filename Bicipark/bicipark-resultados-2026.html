@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bicipark Arroios — Resultados do Inquérito 2026</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      /* ── Paleta oficial ────────────────────────────────────── */
+      --slate:     #2D3A4A;   /* 1 · azul-slate escuro          */
+      --gray-warm: #E0DDD5;   /* 2 · cinza creme claro          */
+      --teal:      #2B5D56;   /* 3 · verde-teal escuro          */
+      --amber:     #D4A520;   /* 4 · âmbar / dourado            */
+      --navy:      #1A2844;   /* 5 · azul-noite muito escuro    */
+      --terra:     #B85C3C;   /* 6 · terracota / ferrugem       */
+      --cream:     #E8E3D4;   /* 7 · creme muito claro          */
+
+      /* ── Derivados utilitários ────────────────────────────── */
+      --slate-mid:   #3d5066;
+      --teal-mid:    #3a7a71;
+      --teal-light:  #a8cec9;
+      --amber-light: #f0d07a;
+      --amber-dark:  #a67c0f;
+      --terra-light: #e0a48c;
+      --navy-light:  #2d4068;
+      --cream-dark:  #ccc8bc;
+      --white:       #ffffff;
+      --text-dark:   #111820;
+      --text-mid:    #4a5668;
+      --text-light:  #8a95a3;
+
+      --shadow-sm: 0 1px 4px rgba(26,40,68,.08);
+      --shadow:    0 4px 18px rgba(26,40,68,.10);
+      --radius:    14px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--cream);
+      color: var(--text-dark);
+      line-height: 1.6;
+    }
+
+    h1, h2, h3, h4,
+    .kpi-value, .wtp-band-val,
+    .section-title, .card-title,
+    .header-text h1 {
+      font-family: 'Unbounded', sans-serif;
+    }
+
+    /* ── Header ───────────────────────────────────────────────── */
+    header {
+      background: var(--navy);
+      color: var(--white);
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 80% -20%, var(--teal) 0%, transparent 55%),
+        radial-gradient(ellipse at 20% 120%, var(--slate) 0%, transparent 50%);
+      opacity: .55;
+      pointer-events: none;
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 52px 36px 56px;
+      display: flex;
+      align-items: flex-start;
+      gap: 32px;
+      position: relative;
+    }
+    .header-logo {
+      flex-shrink: 0;
+      width: 80px; height: 80px;
+      background: rgba(255,255,255,.12);
+      border: 1.5px solid rgba(255,255,255,.22);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+    }
+    .header-text h1 {
+      font-size: clamp(20px, 3vw, 30px);
+      font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1.2;
+    }
+    .header-text h1 em {
+      font-style: normal;
+      color: var(--amber);
+    }
+    .header-text p {
+      margin-top: 10px;
+      font-size: 14px;
+      opacity: .7;
+      max-width: 560px;
+      line-height: 1.6;
+    }
+    .header-meta {
+      display: flex;
+      gap: 10px;
+      margin-top: 22px;
+      flex-wrap: wrap;
+    }
+    .chip {
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .wave {
+      display: block;
+      width: 100%;
+      margin-bottom: -2px;
+    }
+
+    /* ── Layout ───────────────────────────────────────────────── */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 44px 24px 88px;
+    }
+    section { margin-bottom: 60px; }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid var(--cream-dark);
+    }
+    .section-title .icon {
+      width: 34px; height: 34px;
+      background: var(--navy);
+      color: var(--amber);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    /* ── KPI cards ────────────────────────────────────────────── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+      gap: 14px;
+    }
+    .kpi-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 24px 18px 20px;
+      box-shadow: var(--shadow-sm);
+      text-align: center;
+      border-top: 5px solid var(--teal);
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-card::after {
+      content: '';
+      position: absolute;
+      bottom: -18px; right: -18px;
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: .04;
+    }
+    .kpi-card.amber  { border-top-color: var(--amber); }
+    .kpi-card.terra  { border-top-color: var(--terra); }
+    .kpi-card.slate  { border-top-color: var(--slate); }
+    .kpi-card.navy   { border-top-color: var(--navy); }
+
+    .kpi-value {
+      font-size: 34px;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--teal);
+    }
+    .kpi-card.amber .kpi-value { color: var(--amber-dark); }
+    .kpi-card.terra .kpi-value { color: var(--terra); }
+    .kpi-card.slate .kpi-value { color: var(--slate); }
+    .kpi-card.navy  .kpi-value { color: var(--navy); }
+
+    .kpi-label {
+      font-family: 'Unbounded', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--text-light);
+      margin-top: 7px;
+    }
+    .kpi-sub {
+      font-size: 11px;
+      color: var(--text-light);
+      margin-top: 3px;
+    }
+
+    /* ── Chart cards ──────────────────────────────────────────── */
+    .chart-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 20px;
+    }
+    .chart-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 26px;
+      box-shadow: var(--shadow-sm);
+    }
+    .card-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      margin-bottom: 20px;
+    }
+    .chart-wrap          { position: relative; height: 240px; }
+    .chart-wrap.tall     { height: 310px; }
+    .chart-wrap.short    { height: 180px; }
+
+    /* ── Horizontal bar ───────────────────────────────────────── */
+    .hbar-list { display: flex; flex-direction: column; gap: 10px; }
+    .hbar-item { display: flex; flex-direction: column; gap: 4px; }
+    .hbar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12.5px;
+      color: var(--text-mid);
+    }
+    .hbar-label strong { font-weight: 700; color: var(--text-dark); }
+    .hbar-track {
+      height: 9px;
+      background: var(--cream);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .hbar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--teal);
+    }
+
+    /* ── WTP bands ────────────────────────────────────────────── */
+    .wtp-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .wtp-band {
+      text-align: center;
+      padding: 20px 14px;
+      border-radius: 12px;
+      background: var(--cream);
+    }
+    .wtp-band.fair    { background: #fdf3dc; }
+    .wtp-band.bargain { background: #e8eef6; }
+    .wtp-band-val {
+      font-size: 30px;
+      font-weight: 700;
+      color: var(--teal);
+    }
+    .wtp-band.fair    .wtp-band-val { color: var(--amber-dark); }
+    .wtp-band.bargain .wtp-band-val { color: var(--slate-mid); }
+    .wtp-band-lbl {
+      font-family: 'Unbounded', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--text-light);
+      margin-top: 6px;
+    }
+    .wtp-band-med { font-size: 11px; color: var(--text-light); margin-top: 3px; }
+
+    /* ── Alert box ────────────────────────────────────────────── */
+    .alert-box {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .alert-box.red    { background: #fdecea; border-left: 3px solid var(--terra); color: #8b2710; }
+    .alert-box.green  { background: #e6f3f1; border-left: 3px solid var(--teal);  color: var(--teal); }
+    .alert-box.amber  { background: #fdf3dc; border-left: 3px solid var(--amber); color: var(--amber-dark); }
+
+    /* ── Location table ───────────────────────────────────────── */
+    .loc-table { width: 100%; border-collapse: collapse; }
+    .loc-table th {
+      font-family: 'Unbounded', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--text-light);
+      padding: 8px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--cream-dark);
+    }
+    .loc-table td {
+      padding: 10px 12px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--cream);
+      vertical-align: middle;
+    }
+    .loc-table tr:last-child td { border-bottom: none; }
+    .loc-table tr:hover td { background: #f7f5f0; }
+    .loc-rank {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--cream);
+      color: var(--slate);
+      font-size: 11px;
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .loc-rank.top3 { background: var(--navy); color: var(--amber); }
+    .loc-bar-wrap  { display: flex; align-items: center; gap: 8px; }
+    .loc-mini-bar  { height: 8px; border-radius: 999px; background: var(--teal); }
+    .loc-count     { font-size: 12px; font-weight: 700; color: var(--teal); font-family: 'Unbounded', sans-serif; }
+
+    /* ── Insight cards ────────────────────────────────────────── */
+    .insight-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 16px;
+    }
+    .insight-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 22px 20px;
+      box-shadow: var(--shadow-sm);
+      border-left: 4px solid var(--teal);
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .insight-card.warn   { border-left-color: var(--amber); }
+    .insight-card.terra  { border-left-color: var(--terra); }
+    .insight-card.slate  { border-left-color: var(--slate); }
+    .insight-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+    .insight-body h4 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+      line-height: 1.4;
+      text-transform: uppercase;
+      letter-spacing: .3px;
+    }
+    .insight-body p { font-size: 13px; color: var(--text-mid); line-height: 1.55; }
+
+    /* ── Footer ───────────────────────────────────────────────── */
+    footer {
+      background: var(--navy);
+      color: rgba(255,255,255,.5);
+      text-align: center;
+      font-size: 11.5px;
+      padding: 28px 24px;
+    }
+    footer strong { color: var(--white); }
+
+    /* ── Responsive ───────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .header-inner { flex-direction: column; gap: 16px; padding: 36px 20px 44px; }
+      .wtp-summary  { grid-template-columns: 1fr; }
+      .chart-wrap   { height: 200px; }
+      .chart-grid-2, .chart-grid-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ─────────────────────────────────────────────────── -->
+<header>
+  <div class="header-inner">
+    <div class="header-logo">🚲</div>
+    <div class="header-text">
+      <h1>Bicipark <em>Arroios</em><br/>Resultados do Inquérito 2026</h1>
+      <p>Análise das preferências e necessidades de estacionamento seguro para bicicletas na freguesia de Arroios, Lisboa</p>
+      <div class="header-meta">
+        <span class="chip">📅 30 Abr – 24 Mai 2026</span>
+        <span class="chip">👥 117 respondentes</span>
+        <span class="chip">📍 Freguesia de Arroios</span>
+      </div>
+    </div>
+    <div style="margin-left:auto;flex-shrink:0;display:flex;align-items:center;">
+      <img src="https://manuelbanza.github.io/Apoio//Random/brazao_jfa.png" alt="Brasão de Arroios" style="height:100px;width:auto;filter:drop-shadow(0 2px 12px rgba(0,0,0,.5));" />
+    </div>
+  </div>
+  <svg class="wave" viewBox="0 0 1200 56" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+    <path d="M0,32 C300,72 900,0 1200,36 L1200,56 L0,56 Z" fill="#E8E3D4"/>
+  </svg>
+</header>
+
+<main>
+
+  <!-- 1 · RESUMO EXECUTIVO ─────────────────────────────────────── -->
+  <section>
+    <div class="section-title">
+      <span class="icon">📊</span> Resumo Executivo
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card slate">
+        <div class="kpi-value">117</div>
+        <div class="kpi-label">Respondentes</div>
+        <div class="kpi-sub">25 dias de recolha</div>
+      </div>
+      <div class="kpi-card terra">
+        <div class="kpi-value">89,7%</div>
+        <div class="kpi-label">Sem estacionamento seguro</div>
+        <div class="kpi-sub">105 em 117 respondentes</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-value">€8,6</div>
+        <div class="kpi-label">Preço justo médio</div>
+        <div class="kpi-sub">mediana ~€7,0 / mês</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value">69,2%</div>
+        <div class="kpi-label">Utilização ≥ 3×/semana</div>
+        <div class="kpi-sub">utilizadores regulares</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value">83,8%</div>
+        <div class="kpi-label">Proprietários de bicicleta</div>
+        <div class="kpi-sub">98 em 117 respondentes</div>
+      </div>
+      <div class="kpi-card navy">
+        <div class="kpi-value">23,9%</div>
+        <div class="kpi-label">Bicicletas de carga</div>
+        <div class="kpi-sub">espaços de maior dimensão</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · PERFIL DOS RESPONDENTES ─────────────────────────────── -->
+  <section>
+    <div class="section-title">
+      <span class="icon">👤</span> Perfil dos Respondentes
+    </div>
+    <div class="chart-grid-3">
+      <div class="card">
+        <div class="card-title">Faixa Etária</div>
+        <div class="chart-wrap">
+          <canvas id="chartAge"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Género</div>
+        <div class="chart-wrap">
+          <canvas id="chartGender"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Situação Profissional</div>
+        <div class="chart-wrap">
+          <canvas id="chartEmployment"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · PADRÕES DE UTILIZAÇÃO ───────────────────────────────── -->
+  <section>
+    <div class="section-title">
+      <span class="icon">🚴</span> Padrões de Utilização
+    </div>
+    <div class="chart-grid-2">
+      <div class="card">
+        <div class="card-title">Frequência Semanal de Utilização</div>
+        <div class="chart-wrap">
+          <canvas id="chartFreq"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Tipo de Bicicleta e Finalidade das Deslocações</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
+          <div>
+            <div class="chart-wrap short">
+              <canvas id="chartBikeType"></canvas>
+            </div>
+            <p style="font-size:11px;color:var(--text-light);text-align:center;margin-top:8px;">Tipo de bicicleta</p>
+          </div>
+          <div style="padding-top:4px;">
+            <div class="hbar-list">
+              <div class="hbar-item">
+                <div class="hbar-label"><span>Deslocação diária</span><strong>77%</strong></div>
+                <div class="hbar-track"><div class="hbar-fill" style="width:77%"></div></div>
+              </div>
+              <div class="hbar-item">
+                <div class="hbar-label"><span>Lazer</span><strong>62%</strong></div>
+                <div class="hbar-track"><div class="hbar-fill" style="width:62%;background:var(--teal-mid)"></div></div>
+              </div>
+              <div class="hbar-item">
+                <div class="hbar-label"><span>Compras</span><strong>43%</strong></div>
+                <div class="hbar-track"><div class="hbar-fill" style="width:43%;background:var(--teal-light)"></div></div>
+              </div>
+              <div class="hbar-item">
+                <div class="hbar-label"><span>Exercício</span><strong>40%</strong></div>
+                <div class="hbar-track"><div class="hbar-fill" style="width:40%;background:var(--amber)"></div></div>
+              </div>
+              <div class="hbar-item">
+                <div class="hbar-label"><span>Profissional</span><strong>28%</strong></div>
+                <div class="hbar-track"><div class="hbar-fill" style="width:28%;background:var(--slate)"></div></div>
+              </div>
+            </div>
+            <p style="font-size:11px;color:var(--text-light);margin-top:12px;">Finalidade (múltipla escolha)</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · SITUAÇÃO ATUAL DE ESTACIONAMENTO ────────────────────── -->
+  <section>
+    <div class="section-title">
+      <span class="icon">🔒</span> Situação Atual de Estacionamento
+    </div>
+    <div class="chart-grid-3">
+      <div class="card">
+        <div class="card-title">Propriedade de Bicicleta</div>
+        <div class="chart-wrap short">
+          <canvas id="chartOwnsBike"></canvas>
+        </div>
+        <div class="alert-box green">
+          <strong>98 respondentes</strong> possuem bicicleta própria — demonstrando necessidade real e imediata.
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Tem Estacionamento Seguro?</div>
+        <div class="chart-wrap short">
+          <canvas id="chartHasParking"></canvas>
+        </div>
+        <div class="alert-box red">
+          <strong>105 respondentes (89,7%)</strong> não têm acesso a estacionamento seguro para a sua bicicleta.
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Avaliação da Segurança Atual (1–4)</div>
+        <div class="chart-wrap short">
+          <canvas id="chartSecurity"></canvas>
+        </div>
+        <div class="alert-box amber">
+          <strong>73,5%</strong> avaliam a segurança atual como fraca (1) ou muito fraca (2).
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · DISPONIBILIDADE A PAGAR ─────────────────────────────── -->
+  <section>
+    <div class="section-title">
+      <span class="icon">💶</span> Disponibilidade a Pagar
+    </div>
+    <div class="wtp-summary">
+      <div class="wtp-band">
+        <div class="wtp-band-val">€13,0</div>
+        <div class="wtp-band-lbl">Máximo · média</div>
+        <div class="wtp-band-med">mediana: €10,0</div>
+      </div>
+      <div class="wtp-band fair">
+        <div class="wtp-band-val">€8,6</div>
+        <div class="wtp-band-lbl">Preço Justo · média</div>
+        <div class="wtp-band-med">mediana: €7,0</div>
+      </div>
+      <div class="wtp-band bargain">
+        <div class="wtp-band-val">€4,8</div>
+        <div class="wtp-band-lbl">Pechincha · média</div>
+        <div class="wtp-band-med">mediana: €4,5</div>
+      </div>
+    </div>
+    <div class="chart-grid-2">
+      <div class="card">
+        <div class="card-title">Distribuição da Disponibilidade a Pagar Máxima (€/mês)</div>
+        <div class="chart-wrap tall">
+          <canvas id="chartWTPDist"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Comparação dos Três Níveis de Preço</div>
+        <div class="chart-wrap tall">
+          <canvas id="chartWTPCompare"></canvas>
+        </div>
+        <p style="margin-top:14px;font-size:13px;color:var(--text-mid);line-height:1.55;">
+          A diferença entre "pechincha" (€4,8) e "máximo" (€13,0) indica uma
+          <strong>janela de preço ótima entre €5–€8/mês</strong> para maximizar adesão.
+          O único custo atual registado foi <strong>€18/mês</strong>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · LOCALIZAÇÕES ────────────────────────────────────────── -->
+  <section>
+    <div class="section-title">
+      <span class="icon">📍</span> Localizações Mais Procuradas
+    </div>
+    <div class="chart-grid-2">
+      <div class="card">
+        <div class="card-title">Top 10 Localizações por Número de Pedidos</div>
+        <table class="loc-table">
+          <thead>
+            <tr><th>#</th><th>Localização</th><th>Pedidos</th></tr>
+          </thead>
+          <tbody id="locTableBody"></tbody>
+        </table>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;display:flex;flex-direction:column;">
+        <div style="padding:20px 26px 14px;">
+          <div class="card-title">Mapa de Localizações Bicipark</div>
+        </div>
+        <iframe
+          src="https://bicipark.decidimosarroios.pt/"
+          style="flex:1;min-height:460px;width:100%;border:none;display:block;"
+          title="Mapa Bicipark Arroios"
+          loading="lazy"
+          allow="geolocation"
+        ></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · CONCLUSÕES E RECOMENDAÇÕES ─────────────────────────── -->
+  <section>
+    <div class="section-title">
+      <span class="icon">💡</span> Conclusões e Recomendações
+    </div>
+    <div class="insight-grid">
+      <div class="insight-card terra">
+        <div class="insight-icon">🚨</div>
+        <div class="insight-body">
+          <h4>Défice crítico de estacionamento</h4>
+          <p>89,7% não têm estacionamento seguro apesar de 83,8% possuírem bicicleta. A procura existe mas a oferta é inexistente.</p>
+        </div>
+      </div>
+      <div class="insight-card warn">
+        <div class="insight-icon">📅</div>
+        <div class="insight-body">
+          <h4>Utilizadores diários dependentes</h4>
+          <p>69,2% andam de bicicleta 3 ou mais vezes por semana. A falta de estacionamento é uma barreira diária à mobilidade suave.</p>
+        </div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">💶</div>
+        <div class="insight-body">
+          <h4>Clara vontade de pagar</h4>
+          <p>Média de €13,0/mês (máximo) e €8,6/mês (preço justo). Um valor entre <strong>€5–€8/mês</strong> é sustentável para a maioria.</p>
+        </div>
+      </div>
+      <div class="insight-card slate">
+        <div class="insight-icon">📍</div>
+        <div class="insight-body">
+          <h4>Rua Febo Moniz é prioridade #1</h4>
+          <p>Com 21 pedidos, lidera claramente. Juntamente com Praça das Novas Nações e Rua António Pedro, formam o triângulo prioritário de intervenção.</p>
+        </div>
+      </div>
+      <div class="insight-card warn">
+        <div class="insight-icon">📦</div>
+        <div class="insight-body">
+          <h4>Cargo bikes exigem espaços especiais</h4>
+          <p>23,9% usam bicicletas de carga — quase 1 em cada 4. Os módulos Bicipark devem incluir espaços adaptados por posto.</p>
+        </div>
+      </div>
+      <div class="insight-card slate">
+        <div class="insight-icon">🧑‍💼</div>
+        <div class="insight-body">
+          <h4>Público-alvo: ativos 35–44 anos</h4>
+          <p>52,1% têm entre 35–44 anos, maioritariamente trabalhadores. Os horários de acesso devem responder a padrões de commute.</p>
+        </div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">🔐</div>
+        <div class="insight-body">
+          <h4>Segurança como fator decisivo</h4>
+          <p>73,5% avaliam a situação atual como fraca ou muito fraca. Câmaras e estruturas robustas são condição de adesão.</p>
+        </div>
+      </div>
+      <div class="insight-card terra">
+        <div class="insight-icon">🛒</div>
+        <div class="insight-body">
+          <h4>Uso multimodal e multifinalidade</h4>
+          <p>77% usam a bicicleta no commute, 62% no lazer e 43% nas compras. Os Bicipark devem estar próximos de transportes e serviços.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <strong>Junta de Freguesia de Arroios</strong> · Pelouro da Mobilidade · Bicipark 2026 ·
+  Dados recolhidos entre 30 de abril e 24 de maio de 2026 · 117 respondentes
+</footer>
+
+<!-- ── CHARTS ──────────────────────────────────────────────────── -->
+<script>
+/* palette */
+const C = {
+  slate:  '#2D3A4A',
+  gray:   '#E0DDD5',
+  teal:   '#2B5D56',
+  amber:  '#D4A520',
+  navy:   '#1A2844',
+  terra:  '#B85C3C',
+  cream:  '#E8E3D4',
+  tealMid:'#3a7a71',
+  tealLt: '#a8cec9',
+  ambLt:  '#f0d07a',
+  white:  '#ffffff',
+  gray2:  '#ccc8bc',
+};
+
+const font = { family: 'Unbounded', size: 11 };
+Chart.defaults.font = { family: 'Inter', size: 12 };
+Chart.defaults.color = '#8a95a3';
+
+const tip = {
+  backgroundColor: C.navy,
+  titleFont: { family: 'Unbounded', size: 11, weight: '700' },
+  bodyFont:  { family: 'Inter', size: 12 },
+  padding: 12,
+  cornerRadius: 8,
+};
+
+/* ── Age ───────────────────────────────────────────────────────── */
+new Chart(document.getElementById('chartAge'), {
+  type: 'bar',
+  data: {
+    labels: ['18–24', '25–34', '35–44', '45–54', '55–64'],
+    datasets: [{
+      data: [4, 23, 61, 19, 10],
+      backgroundColor: [C.tealLt, C.tealMid, C.teal, C.slate, C.gray2],
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { ...tip,
+      callbacks: { label: ctx => ` ${ctx.raw} respondentes (${(ctx.raw/117*100).toFixed(1)}%)` }
+    }},
+    scales: {
+      y: { beginAtZero: true, grid: { color: '#f0ede6' }, ticks: { stepSize: 15 } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+/* ── Gender ────────────────────────────────────────────────────── */
+new Chart(document.getElementById('chartGender'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Masculino', 'Feminino', 'Outro / Não indica'],
+    datasets: [{
+      data: [58, 57, 2],
+      backgroundColor: [C.teal, C.amber, C.gray2],
+      borderWidth: 3, borderColor: C.white,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    cutout: '66%',
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 14, font: { size: 12 } } },
+      tooltip: { ...tip, callbacks: { label: ctx => ` ${ctx.raw} (${(ctx.raw/117*100).toFixed(1)}%)` } }
+    }
+  }
+});
+
+/* ── Employment ────────────────────────────────────────────────── */
+new Chart(document.getElementById('chartEmployment'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Por conta de outrem', 'Independente', 'Estudante', 'Outro / Reformado'],
+    datasets: [{
+      data: [77, 29, 6, 5],
+      backgroundColor: [C.navy, C.teal, C.amber, C.gray2],
+      borderWidth: 3, borderColor: C.white,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    cutout: '66%',
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 10, font: { size: 11 }, boxWidth: 12 } },
+      tooltip: { ...tip, callbacks: { label: ctx => ` ${ctx.raw} (${(ctx.raw/117*100).toFixed(1)}%)` } }
+    }
+  }
+});
+
+/* ── Frequency ─────────────────────────────────────────────────── */
+new Chart(document.getElementById('chartFreq'), {
+  type: 'bar',
+  data: {
+    labels: ['5+ vezes / semana', '3–4 vezes / semana', '1–2 vezes / semana', 'Ocasional', 'Nunca'],
+    datasets: [{
+      label: 'Respondentes',
+      data: [48, 33, 17, 14, 5],
+      backgroundColor: [C.navy, C.teal, C.tealMid, C.amber, C.gray2],
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { ...tip, callbacks: { label: ctx => ` ${ctx.raw} respondentes (${(ctx.raw/117*100).toFixed(1)}%)` } }
+    },
+    scales: {
+      x: { beginAtZero: true, grid: { color: '#f0ede6' }, max: 48 },
+      y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+    }
+  }
+});
+
+/* ── Bike type ─────────────────────────────────────────────────── */
+new Chart(document.getElementById('chartBikeType'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Tradicional', 'Carga (cargo)'],
+    datasets: [{
+      data: [89, 28],
+      backgroundColor: [C.teal, C.slate],
+      borderWidth: 3, borderColor: C.white,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    cutout: '62%',
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 10, font: { size: 11 }, boxWidth: 12 } },
+      tooltip: { ...tip, callbacks: { label: ctx => ` ${ctx.raw} (${(ctx.raw/117*100).toFixed(1)}%)` } }
+    }
+  }
+});
+
+/* ── Owns bike ─────────────────────────────────────────────────── */
+new Chart(document.getElementById('chartOwnsBike'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Tem bicicleta', 'Não tem'],
+    datasets: [{
+      data: [98, 19],
+      backgroundColor: [C.teal, C.gray2],
+      borderWidth: 3, borderColor: C.white,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    cutout: '66%',
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 12, font: { size: 12 } } },
+      tooltip: { ...tip, callbacks: { label: ctx => ` ${ctx.raw} (${(ctx.raw/117*100).toFixed(1)}%)` } }
+    }
+  }
+});
+
+/* ── Has parking ───────────────────────────────────────────────── */
+new Chart(document.getElementById('chartHasParking'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Sem estacionamento seguro', 'Com estacionamento seguro'],
+    datasets: [{
+      data: [105, 12],
+      backgroundColor: [C.terra, C.teal],
+      borderWidth: 3, borderColor: C.white,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    cutout: '66%',
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 10, font: { size: 11 }, boxWidth: 12 } },
+      tooltip: { ...tip, callbacks: { label: ctx => ` ${ctx.raw} (${(ctx.raw/117*100).toFixed(1)}%)` } }
+    }
+  }
+});
+
+/* ── Security rating ───────────────────────────────────────────── */
+new Chart(document.getElementById('chartSecurity'), {
+  type: 'bar',
+  data: {
+    labels: ['1 – Muito fraca', '2 – Fraca', '3 – Moderada', '4 – Boa'],
+    datasets: [{
+      data: [44, 42, 24, 7],
+      backgroundColor: [C.terra, C.amber, C.tealMid, C.teal],
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { ...tip, callbacks: { label: ctx => ` ${ctx.raw} respondentes (${(ctx.raw/117*100).toFixed(1)}%)` } }
+    },
+    scales: {
+      y: { beginAtZero: true, grid: { color: '#f0ede6' } },
+      x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+    }
+  }
+});
+
+/* ── WTP Distribution ──────────────────────────────────────────── */
+new Chart(document.getElementById('chartWTPDist'), {
+  type: 'bar',
+  data: {
+    labels: ['€0', '€1–4', '€5', '€6–9', '€10', '€11–14', '€15–19', '€20–24', '€25–29', '€30+'],
+    datasets: [{
+      label: 'Respondentes',
+      data: [3, 8, 9, 15, 35, 10, 14, 10, 7, 6],
+      backgroundColor: [
+        C.gray2, C.gray2, C.tealLt, C.tealMid, C.teal,
+        C.tealMid, C.amber, C.terra, C.slate, C.navy
+      ],
+      borderRadius: 5,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { ...tip, callbacks: { label: ctx => ` ${ctx.raw} respondentes` } }
+    },
+    scales: {
+      y: { beginAtZero: true, grid: { color: '#f0ede6' } },
+      x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+    }
+  }
+});
+
+/* ── WTP Compare ───────────────────────────────────────────────── */
+new Chart(document.getElementById('chartWTPCompare'), {
+  type: 'bar',
+  data: {
+    labels: ['Disp. a Pagar Máx.', 'Preço Justo', 'Pechincha'],
+    datasets: [
+      {
+        label: 'Média',
+        data: [13.0, 8.6, 4.8],
+        backgroundColor: [C.teal, C.amber, C.slate],
+        borderRadius: 6,
+      },
+      {
+        label: 'Mediana',
+        data: [10.0, 7.0, 4.5],
+        backgroundColor: [C.tealLt, C.ambLt, C.gray2],
+        borderRadius: 6,
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 12 }, padding: 14 } },
+      tooltip: { ...tip, callbacks: { label: ctx => ` €${ctx.raw.toFixed(1)}/mês` } }
+    },
+    scales: {
+      y: { beginAtZero: true, grid: { color: '#f0ede6' }, ticks: { callback: v => '€' + v } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+/* ── Locations ─────────────────────────────────────────────────── */
+const locations = [
+  { name: 'Rua Febo Moniz 1',                count: 21 },
+  { name: 'Rua António Pedro 115',            count: 18 },
+  { name: 'Praça das Novas Nações',           count: 15 },
+  { name: 'Rua José Estevão 135a',            count: 14 },
+  { name: 'Rua José Falcão 57',               count: 10 },
+  { name: 'Rua Maria da Fonte 4',             count:  9 },
+  { name: 'Rua Ângela Pinto 40d',             count:  9 },
+  { name: 'Campo dos Mártires da Pátria 117', count:  8 },
+  { name: 'Rua Maria 71',                     count:  7 },
+  { name: 'Rua Carlos Mardel 50',             count:  7 },
+];
+
+const tbody = document.getElementById('locTableBody');
+locations.forEach((loc, i) => {
+  const top = i < 3;
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><span class="loc-rank ${top ? 'top3' : ''}">${i + 1}</span></td>
+    <td style="font-weight:${top ? 600 : 400}">${loc.name}</td>
+    <td>
+      <div class="loc-bar-wrap">
+        <div class="loc-mini-bar" style="width:${(loc.count / 21 * 72).toFixed(0)}px;opacity:${top ? 1 : .65}"></div>
+        <span class="loc-count">${loc.count}</span>
+      </div>
+    </td>`;
+  tbody.appendChild(tr);
+});
+
+</script>
+</body>
+</html>
