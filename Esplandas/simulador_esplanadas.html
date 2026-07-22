@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador · Esplanadas em Estacionamento · Arroios 2026</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #f2f1ee;
+  --surface: #ffffff;
+  --s1:      #f8f7f5;
+  --border:  #e0ded8;
+  --border2: #c5c3bc;
+  --text:    #111110;
+  --text2:   #52514e;
+  --text3:   #898781;
+  --green:   #0F6E56;
+  --green2:  #3B6D11;
+  --green-bg:#E1F5EE;
+  --green2-bg:#EAF3DE;
+  --blue:    #185FA5;
+  --blue-bg: #E6F1FB;
+  --amber:   #854F0B;
+  --amber-bg:#FAEEDA;
+  --red:     #A32D2D;
+  --red-bg:  #FCEBEB;
+  --r:       8px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+  padding: 32px 16px 72px;
+}
+.container { max-width: 780px; margin: 0 auto; }
+
+/* ─── HEADER ─── */
+.page-header { margin-bottom: 36px; border-left: 3px solid var(--green); padding-left: 16px; }
+.kicker { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
+.page-header h1 { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.page-header .sub { font-size: 13px; color: var(--text2); }
+
+.orientation-note {
+  background: var(--blue-bg); border: 0.5px solid #B5D4F4;
+  border-radius: var(--r); padding: 11px 15px; margin-bottom: 28px;
+  font-size: 13px; color: #0C447C; line-height: 1.55;
+}
+
+/* ─── SECTION LABEL ─── */
+.slabel {
+  font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--text3); margin: 28px 0 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.slabel::after { content: ''; flex: 1; height: 0.5px; background: var(--border); }
+
+/* ─── CARD ─── */
+.card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 12px; }
+
+/* ─── CRITERION HEADER ─── */
+.crit-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 14px; margin-bottom: 14px; border-bottom: 0.5px solid var(--border); gap: 12px;
+}
+.crit-head-left { display: flex; align-items: center; gap: 10px; }
+.crit-icon { width: 34px; height: 34px; border-radius: var(--r); display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+.crit-title { font-size: 15px; font-weight: 600; color: var(--text); }
+.crit-sub   { font-size: 12px; color: var(--text3); margin-top: 1px; }
+.crit-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.badge { font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 100px; white-space: nowrap; }
+.pts-note { font-size: 13px; color: var(--text2); white-space: nowrap; }
+
+/* ─── BANDS ─── */
+.bands { border: 0.5px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.band { display: grid; grid-template-columns: 1.6fr 1fr 52px; padding: 10px 14px; align-items: center; gap: 10px; border-bottom: 0.5px solid var(--border); }
+.band:last-child { border-bottom: none; }
+.b-range { font-size: 14px; font-weight: 500; color: var(--text); }
+.b-desc  { font-size: 12px; color: var(--text2); }
+.b-pts   { font-size: 15px; font-weight: 700; text-align: right; }
+.pt-a { color: var(--green); }
+.pt-b { color: var(--green2); }
+.pt-c { color: var(--blue); }
+.pt-d { color: var(--amber); }
+.pt-e { color: var(--text3); }
+
+/* ─── FORMULA BOX ─── */
+.formula-box {
+  background: var(--blue-bg); border: 0.5px solid #B5D4F4;
+  border-radius: var(--r); padding: 13px 16px; margin-bottom: 12px;
+}
+.formula-title { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: #185FA5; margin-bottom: 10px; }
+.formula-body  { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.formula-fraction { flex: 1; min-width: 200px; text-align: center; }
+.formula-num  { font-size: 13px; font-weight: 500; color: #0C447C; padding-bottom: 6px; }
+.formula-bar  { height: 1.5px; background: #185FA5; margin: 0 auto; max-width: 340px; }
+.formula-den  { font-size: 13px; font-weight: 500; color: #0C447C; padding-top: 6px; }
+.formula-scope { font-size: 12px; color: #185FA5; border-left: 2px solid #185FA5; padding-left: 10px; flex-shrink: 0; max-width: 220px; line-height: 1.5; }
+@media(max-width:540px){ .formula-scope { border-left: none; border-top: 1.5px solid #185FA5; padding-left: 0; padding-top: 8px; max-width: 100%; } }
+
+/* ─── PASSEIO MATRIX TABLE ─── */
+.matrix-table { width: 100%; border-collapse: collapse; font-size: 13px; border: 0.5px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.matrix-table th {
+  background: var(--s1); padding: 10px 13px; font-weight: 600; font-size: 12px;
+  color: var(--text2); text-align: left; border-bottom: 0.5px solid var(--border);
+  border-right: 0.5px solid var(--border);
+}
+.matrix-table th:last-child { border-right: none; }
+.matrix-table td {
+  padding: 10px 13px; border-bottom: 0.5px solid var(--border);
+  border-right: 0.5px solid var(--border); vertical-align: middle;
+}
+.matrix-table td:last-child { border-right: none; }
+.matrix-table tr:last-child td { border-bottom: none; }
+.pts-cell { font-weight: 700; font-size: 15px; text-align: center; }
+.pts-max  { color: var(--green); }
+.pts-high { color: var(--green2); }
+.pts-mid  { color: var(--blue); }
+.pts-low  { color: var(--amber); }
+.pts-dim  { color: var(--text3); }
+.th-sub { font-size: 11px; font-weight: 400; color: var(--text3); display: block; margin-top: 2px; line-height: 1.4; }
+.dl-note { font-size: 11px; color: var(--red); font-style: italic; }
+
+/* ─── BONUS PILL ─── */
+.bonus-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--green-bg); border: 0.5px solid #9FE1CB;
+  border-radius: 100px; padding: 3px 10px; font-size: 12px;
+  font-weight: 600; color: var(--green); white-space: nowrap;
+}
+
+.note-strip { font-size: 12px; color: var(--text2); background: var(--s1); border-left: 3px solid var(--border2); padding: 9px 13px; border-radius: 0 var(--r) var(--r) 0; margin-top: 12px; }
+
+/* ─── CATEGORIES LEGEND ─── */
+.cat-legend { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+@media(max-width:560px){ .cat-legend { grid-template-columns: repeat(2, 1fr); } }
+.cat-item { border-radius: var(--r); padding: 12px; border: 0.5px solid; }
+.cat-item .ci-letter { font-size: 28px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+.cat-item .ci-name   { font-size: 12px; font-weight: 600; margin-bottom: 3px; }
+.cat-item .ci-range  { font-size: 11px; opacity: .7; margin-bottom: 6px; }
+.cat-item .ci-desc   { font-size: 11px; line-height: 1.45; opacity: .85; }
+.cat-A { background: var(--green-bg);  border-color: #9FE1CB; color: var(--green);  }
+.cat-B { background: var(--green2-bg); border-color: #C0DD97; color: var(--green2); }
+.cat-C { background: var(--amber-bg);  border-color: #FAC775; color: var(--amber);  }
+.cat-D { background: var(--red-bg);    border-color: #F7C1C1; color: var(--red);    }
+
+/* ─── SIMULATOR ─── */
+.sim-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media(max-width:600px){ .sim-grid { grid-template-columns: 1fr; } }
+
+.form-group { margin-bottom: 0; }
+.form-group > label {
+  display: block; font-size: 11px; font-weight: 700;
+  letter-spacing: .06em; color: var(--text3); margin-bottom: 7px; text-transform: uppercase;
+}
+.form-group select {
+  width: 100%; padding: 9px 32px 9px 12px; border: 0.5px solid var(--border2);
+  border-radius: var(--r); font-size: 14px; color: var(--text); background: white;
+  appearance: none; -webkit-appearance: none; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23898781' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 11px center;
+}
+.form-group select:focus { outline: 2px solid var(--blue); outline-offset: 1px; border-color: transparent; }
+
+/* Radios for passeio */
+.radio-group { display: flex; flex-direction: column; gap: 6px; }
+.ro {
+  display: flex; align-items: center; gap: 10px; padding: 10px 13px;
+  border: 0.5px solid var(--border); border-radius: var(--r);
+  cursor: pointer; transition: all .1s; user-select: none;
+}
+.ro:hover { background: var(--s1); }
+.ro.active { border-color: var(--amber); background: var(--amber-bg); }
+.ro input[type=radio] { width: 15px; height: 15px; cursor: pointer; accent-color: var(--amber); flex-shrink: 0; }
+.ro .ro-inner { flex: 1; }
+.ro .ro-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.ro .ro-desc { font-size: 11px; color: var(--text2); margin-top: 1px; }
+.ro .ro-pts  { font-size: 13px; font-weight: 700; color: var(--amber); flex-shrink: 0; white-space: nowrap; }
+
+/* Comfort toggle */
+.comfort-box {
+  margin-top: 8px; padding: 11px 13px;
+  border: 0.5px solid var(--border); border-radius: var(--r);
+  transition: all .12s;
+}
+.comfort-box.available { cursor: pointer; }
+.comfort-box.available:hover { background: var(--s1); }
+.comfort-box.ticked { border-color: var(--green); background: var(--green-bg); }
+.comfort-box.locked { opacity: .4; pointer-events: none; }
+.cb-inner { display: flex; align-items: flex-start; gap: 9px; }
+.cb-inner input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--green); flex-shrink: 0; margin-top: 2px; cursor: pointer; }
+.cb-text { flex: 1; }
+.cb-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.cb-sub  { font-size: 11px; color: var(--text2); margin-top: 2px; line-height: 1.45; }
+.cb-effect { font-size: 12px; font-weight: 700; color: var(--green); flex-shrink: 0; white-space: nowrap; padding-top: 2px; }
+.cb-note { font-size: 11px; color: var(--text3); margin-top: 7px; padding-top: 7px; border-top: 0.5px solid var(--border); line-height: 1.45; }
+
+/* ─── RESULTS ─── */
+.results-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; overflow: hidden; }
+.results-head { padding: 14px 22px; border-bottom: 0.5px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.results-head h2 { font-size: 14px; font-weight: 600; color: var(--text); }
+.results-head .rh-note { font-size: 12px; color: var(--text3); }
+.results-body { padding: 22px; }
+
+/* Score tiles */
+.score-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+@media(max-width:500px){ .score-tiles { grid-template-columns: 1fr; } }
+.stile { background: var(--s1); border: 0.5px solid var(--border); border-radius: var(--r); padding: 11px; text-align: center; }
+.stile .st-label { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text3); display: block; margin-bottom: 4px; }
+.stile .st-val   { font-size: 22px; font-weight: 700; color: var(--text); line-height: 1.1; }
+.stile .st-max   { font-size: 12px; color: var(--text3); }
+
+/* Category display */
+.cat-display {
+  border-radius: 12px; padding: 20px 22px; margin-bottom: 16px;
+  display: flex; align-items: flex-start; gap: 18px; border: 1px solid;
+}
+.cd-letter { font-size: 56px; font-weight: 800; line-height: 1; flex-shrink: 0; width: 68px; text-align: center; }
+.cd-body { flex: 1; }
+.cd-name  { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.cd-desc  { font-size: 13px; line-height: 1.55; opacity: .9; }
+.cd-score { font-size: 12px; margin-top: 8px; opacity: .7; font-weight: 500; }
+
+/* Progress */
+.progress-wrap { margin-bottom: 0; }
+.progress-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text3); margin-bottom: 5px; }
+.progress-track { height: 8px; background: var(--border); border-radius: 5px; overflow: hidden; position: relative; }
+.progress-fill  { height: 100%; border-radius: 5px; transition: width .35s ease, background .35s; }
+.cat-markers { position: relative; height: 18px; margin-top: 2px; }
+.cat-marker {
+  position: absolute; top: 4px; font-size: 10px; font-weight: 700;
+  transform: translateX(-50%); color: var(--text3);
+}
+.cat-mark-line { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--border2); pointer-events: none; }
+
+/* ─── FOOTER ─── */
+.footer { text-align: center; font-size: 11px; color: var(--text3); margin-top: 40px; letter-spacing: .02em; }
+
+@media print {
+  body { background: white; padding: 16px; }
+  .card, .results-card { box-shadow: none; }
+  .sim-only { display: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="page-header">
+    <div class="kicker">Junta de Freguesia de Arroios · Regulamento 2026</div>
+    <h1>Esplanadas em Lugares de Estacionamento</h1>
+    <div class="sub">Instrumento de orientação para avaliação de pedidos — Versão simplificada</div>
+  </div>
+
+  <div class="orientation-note">
+    ℹ️ <strong>Instrumento de orientação, não de decisão.</strong> Esta ferramenta atribui uma categoria (A–D) com base em dados objetivos, para dar uma primeira ideia da viabilidade e ser transparente nessa avaliação. A categoria obtida serve de base para a equipa técnica ir ao local e analisar o pedido de forma fundamentada antes de qualquer decisão.
+  </div>
+
+  <!-- ─ CRITÉRIOS ─ -->
+  <div class="slabel">Critérios de avaliação</div>
+
+  <!-- Horário -->
+  <div class="card">
+    <div class="crit-head">
+      <div class="crit-head-left">
+        <div class="crit-icon" style="background:var(--green-bg);">🕐</div>
+        <div>
+          <div class="crit-title">Horário de encerramento</div>
+          <div class="crit-sub">Encerramento mais cedo = menor impacto noturno = maior pontuação</div>
+        </div>
+      </div>
+      <div class="crit-right">
+        <span class="badge" style="background:var(--green-bg); color:var(--green);">Peso 50%</span>
+        <span class="pts-note">máx. <strong>50</strong> pts</span>
+      </div>
+    </div>
+    <div class="bands">
+      <div class="band">
+        <span class="b-range">Fecha até às 20h00</span>
+        <span class="b-desc">Antes do período de entardecer</span>
+        <span class="b-pts pt-a">50</span>
+      </div>
+      <div class="band">
+        <span class="b-range">Fecha entre 20h00 e 22h00</span>
+        <span class="b-desc">Horário-regra do regulamento</span>
+        <span class="b-pts pt-b">35</span>
+      </div>
+      <div class="band">
+        <span class="b-range">Fecha entre 22h00 e 24h00</span>
+        <span class="b-desc">Regime excecional — impacto elevado em zonas habitacionais</span>
+        <span class="b-pts pt-c">15</span>
+      </div>
+      <div class="band">
+        <span class="b-range">Fecha após as 24h00</span>
+        <span class="b-desc">Período noturno — impacto máximo nos residentes</span>
+        <span class="b-pts pt-e">0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pressão de estacionamento -->
+  <div class="card">
+    <div class="crit-head">
+      <div class="crit-head-left">
+        <div class="crit-icon" style="background:var(--blue-bg);">🚗</div>
+        <div>
+          <div class="crit-title">Pressão de estacionamento</div>
+          <div class="crit-sub">Taxa de ocupação da zona — menor pressão = mais pontuação</div>
+        </div>
+      </div>
+      <div class="crit-right">
+        <span class="badge" style="background:var(--blue-bg); color:var(--blue);">Peso 25%</span>
+        <span class="pts-note">máx. <strong>25</strong> pts</span>
+      </div>
+    </div>
+    <div class="formula-box">
+      <div class="formula-title">Como se calcula a taxa de pressão de estacionamento</div>
+      <div class="formula-body">
+        <div class="formula-fraction">
+          <div class="formula-num">N.º de dísticos de residente ou família numerosa emitidos pela EMEL</div>
+          <div class="formula-bar"></div>
+          <div class="formula-den">N.º de alojamentos familiares clássicos de residência habitual (INE)</div>
+        </div>
+        <div class="formula-scope">Ambos os valores à escala da <strong>secção estatística do INE</strong> correspondente ao local do pedido</div>
+      </div>
+    </div>
+    <div class="bands">
+      <div class="band">
+        <span class="b-range">Taxa ≤ 0,8</span>
+        <span class="b-desc">Oferta confortável — impacto reduzido para residentes</span>
+        <span class="b-pts pt-a">25</span>
+      </div>
+      <div class="band">
+        <span class="b-range">Taxa &gt; 0,8 e ≤ 1,0</span>
+        <span class="b-desc">Proximidade da saturação</span>
+        <span class="b-pts pt-c">15</span>
+      </div>
+      <div class="band">
+        <span class="b-range">Taxa &gt; 1,0 e ≤ 1,2</span>
+        <span class="b-desc">Zona saturada — pressão sobre residentes</span>
+        <span class="b-pts pt-d">8</span>
+      </div>
+      <div class="band">
+        <span class="b-range">Taxa &gt; 1,2</span>
+        <span class="b-desc">Saturação crítica</span>
+        <span class="b-pts pt-e">0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Largura do passeio -->
+  <div class="card">
+    <div class="crit-head">
+      <div class="crit-head-left">
+        <div class="crit-icon" style="background:var(--amber-bg);">🚶</div>
+        <div>
+          <div class="crit-title">Largura do passeio</div>
+          <div class="crit-sub">Passeio estreito justifica mais o uso do estacionamento — lógica invertida</div>
+        </div>
+      </div>
+      <div class="crit-right">
+        <span class="badge" style="background:var(--amber-bg); color:var(--amber);">Peso 25%</span>
+        <span class="pts-note">máx. <strong>35</strong> pts (c/ bónus)</span>
+      </div>
+    </div>
+
+    <table class="matrix-table">
+      <thead>
+        <tr>
+          <th style="width:32%;">Largura do passeio</th>
+          <th>
+            Sem passeio confortável em frente
+            <span class="th-sub">esplanada no estacionamento é a única ou melhor opção</span>
+          </th>
+          <th>
+            Com passeio confortável em frente
+            <span class="th-sub">+ 10 pts — incentiva esplanada no estacionamento em vez do passeio</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>≤ 2,0 m</strong><br><span style="font-size:11px; color:var(--text3);">Muito estreito</span></td>
+          <td class="pts-cell pts-max">25</td>
+          <td class="pts-cell" style="color:#0F6E56; font-weight:700;">35 <span style="font-size:11px; font-weight:400; color:var(--green);">(25 + 10)</span></td>
+        </tr>
+        <tr>
+          <td><strong>2,0 m a 4,0 m</strong><br><span style="font-size:11px; color:var(--text3);">Médio</span></td>
+          <td class="pts-cell pts-mid">15</td>
+          <td class="pts-cell pts-max">25 <span style="font-size:11px; font-weight:400; color:var(--green);">(15 + 10)</span></td>
+        </tr>
+        <tr>
+          <td><strong>&gt; 4,0 m</strong><br><span style="font-size:11px; color:var(--text3);">Largo</span></td>
+          <td class="pts-cell pts-low">5</td>
+          <td class="pts-cell pts-mid">15 <span style="font-size:11px; font-weight:400; color:var(--blue);">(5 + 10)</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="note-strip" style="margin-top:12px;">
+      ⚠️ Requisito mínimo inderrogável: canal pedonal contínuo de 1,5 m após instalação (art.º 7.º/3 do Regulamento). Pedidos que não garantam este mínimo são inelegíveis independentemente da pontuação.<br>
+      📋 <strong>DL 163/2006:</strong> em passeios ≤ 2,0 m, a esplanada no próprio passeio não cumpre os requisitos de acessibilidade — pelo que o bónus de +10 pts se aplica igualmente neste escalão.
+    </div>
+  </div>
+
+  <!-- ─ CATEGORIAS ─ -->
+  <div class="slabel">Categorias de viabilidade</div>
+
+  <div class="card">
+    <div class="cat-legend">
+      <div class="cat-item cat-A">
+        <div class="ci-letter">A</div>
+        <div class="ci-name">Muito provável</div>
+        <div class="ci-range">75–100 pontos</div>
+        <div class="ci-desc">Dados muito favoráveis, baixo impacto esperado. Visita técnica de confirmação.</div>
+      </div>
+      <div class="cat-item cat-B">
+        <div class="ci-letter">B</div>
+        <div class="ci-name">Provável</div>
+        <div class="ci-range">55–74 pontos</div>
+        <div class="ci-desc">Dados favoráveis, impacto controlável. Recomenda-se visita de confirmação.</div>
+      </div>
+      <div class="cat-item cat-C">
+        <div class="ci-letter">C</div>
+        <div class="ci-name">Requer análise</div>
+        <div class="ci-range">35–54 pontos</div>
+        <div class="ci-desc">Dados com condicionantes. Análise rigorosa no local antes de qualquer decisão.</div>
+      </div>
+      <div class="cat-item cat-D">
+        <div class="ci-letter">D</div>
+        <div class="ci-name">Difícil</div>
+        <div class="ci-range">0–34 pontos</div>
+        <div class="ci-desc">Dados desfavoráveis. Impacto elevado provável. Requer justificação reforçada.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─ SIMULADOR ─ -->
+  <div class="slabel sim-only">Simulador</div>
+
+  <div class="card sim-only">
+    <div class="sim-grid">
+
+      <!-- Col 1: Horário + Pressão -->
+      <div style="display:flex; flex-direction:column; gap:16px;">
+
+        <div class="form-group">
+          <label for="sel-h">Horário de encerramento</label>
+          <select id="sel-h" onchange="update()">
+            <option value="50">Fecha até às 20h00</option>
+            <option value="35" selected>Fecha entre 20h00 e 22h00</option>
+            <option value="15">Fecha entre 22h00 e 24h00</option>
+            <option value="0">Fecha após as 24h00</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="sel-p">Taxa de pressão de estacionamento</label>
+          <select id="sel-p" onchange="update()">
+            <option value="25">≤ 0,8 — oferta confortável</option>
+            <option value="15" selected>&gt; 0,8 e ≤ 1,0</option>
+            <option value="8">&gt; 1,0 e ≤ 1,2 — zona saturada</option>
+            <option value="0">&gt; 1,2 — saturação crítica</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- Col 2: Passeio + bónus -->
+      <div>
+        <div class="form-group">
+          <label>Largura do passeio</label>
+          <div class="radio-group">
+            <label class="ro" id="ro0" onclick="pickW(0,'narrow')">
+              <input type="radio" name="pw" value="narrow" id="pw0" onchange="update()">
+              <div class="ro-inner">
+                <div class="ro-name">≤ 2,0 m</div>
+                <div class="ro-desc">Muito estreito — única opção é o estacionamento</div>
+              </div>
+              <span class="ro-pts" id="rp0">25 pts</span>
+            </label>
+            <label class="ro active" id="ro1" onclick="pickW(1,'mid')">
+              <input type="radio" name="pw" value="mid" id="pw1" checked onchange="update()">
+              <div class="ro-inner">
+                <div class="ro-name">2,0 m a 4,0 m</div>
+                <div class="ro-desc">Médio — parcialmente justificado</div>
+              </div>
+              <span class="ro-pts" id="rp1">15 pts</span>
+            </label>
+            <label class="ro" id="ro2" onclick="pickW(2,'wide')">
+              <input type="radio" name="pw" value="wide" id="pw2" onchange="update()">
+              <div class="ro-inner">
+                <div class="ro-name">&gt; 4,0 m</div>
+                <div class="ro-desc">Largo — menos justificado sem bónus</div>
+              </div>
+              <span class="ro-pts" id="rp2">5 pts</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Comfort toggle — ADDS +10 when checked -->
+        <div class="comfort-box available" id="cbox" onclick="toggleComfort()">
+          <div class="cb-inner">
+            <input type="checkbox" id="chk-comfort">
+            <div class="cb-text">
+              <div class="cb-name">Passeio confortável em frente ao estabelecimento</div>
+              <div class="cb-sub">Existe espaço confortável no passeio onde habitualmente poderia estar uma esplanada de passeio — preferível incentivar esplanada no estacionamento</div>
+            </div>
+            <div class="cb-effect" id="cb-effect">+10 pts</div>
+          </div>
+          <div class="cb-note" id="cb-note">Se assinalado: +10 pts — incentiva o uso do estacionamento em vez do passeio, preservando a mobilidade pedonal</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ─ RESULTADO ─ -->
+  <div class="slabel">Resultado</div>
+
+  <div class="results-card">
+    <div class="results-head">
+      <h2>Avaliação orientativa</h2>
+      <span class="rh-note">pontuação 0–110 · categorias A–D</span>
+    </div>
+    <div class="results-body">
+
+      <div class="score-tiles">
+        <div class="stile">
+          <span class="st-label">🕐 Horário</span>
+          <span class="st-val" id="r-h">35</span>
+          <span class="st-max">/ 50</span>
+        </div>
+        <div class="stile">
+          <span class="st-label">🚗 Estacionamento</span>
+          <span class="st-val" id="r-p">15</span>
+          <span class="st-max">/ 25</span>
+        </div>
+        <div class="stile">
+          <span class="st-label">🚶 Passeio</span>
+          <span class="st-val" id="r-w">15</span>
+          <span class="st-max">/ 35</span>
+        </div>
+      </div>
+
+      <div class="cat-display cat-B" id="cat-display">
+        <div class="cd-letter" id="cd-letter">B</div>
+        <div class="cd-body">
+          <div class="cd-name"  id="cd-name">Provável</div>
+          <div class="cd-desc"  id="cd-desc">Os dados indicam condições favoráveis e impacto moderado e controlável. Recomenda-se visita de confirmação ao local antes da decisão.</div>
+          <div class="cd-score" id="cd-score">Pontuação: 65 / 100</div>
+        </div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-labels"><span>0</span><span>100</span></div>
+        <div class="progress-track" style="position:relative;">
+          <div class="progress-fill" id="pfill" style="width:65%;"></div>
+          <div class="cat-mark-line" style="left:35%;"></div>
+          <div class="cat-mark-line" style="left:55%;"></div>
+          <div class="cat-mark-line" style="left:75%;"></div>
+        </div>
+        <div class="cat-markers">
+          <span class="cat-marker" style="left:0%; transform:none; color:var(--red);">D</span>
+          <span class="cat-marker" style="left:35%; color:var(--amber);">C</span>
+          <span class="cat-marker" style="left:55%; color:var(--green2);">B</span>
+          <span class="cat-marker" style="left:75%; color:var(--green);">A</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    Junta de Freguesia de Arroios · Regulamento de Esplanadas em Estacionamento · Julho 2026<br>
+    Instrumento de trabalho interno — não substitui análise técnica nem o regulamento aprovado
+  </div>
+
+</div>
+
+<script>
+var wBand = 'mid';
+var comfortChecked = false;
+
+/* Base pts by width (without comfort bonus) */
+var wBase = { narrow: 25, mid: 15, wide: 5 };
+/* Comfort +10 available for ALL width bands */
+var cmfAvail = { narrow: true, mid: true, wide: true };
+
+function getWPts() {
+  var base = wBase[wBand];
+  var bonus = (cmfAvail[wBand] && comfortChecked) ? 10 : 0;
+  return base + bonus;
+}
+
+function pickW(idx, band) {
+  [0,1,2].forEach(function(i){
+    document.getElementById('ro'+i).classList.remove('active');
+    document.getElementById('pw'+i).checked = false;
+  });
+  document.getElementById('ro'+idx).classList.add('active');
+  document.getElementById('pw'+idx).checked = true;
+  wBand = band;
+
+  var cbox = document.getElementById('cbox');
+  var chk  = document.getElementById('chk-comfort');
+  var note = document.getElementById('cb-note');
+  var eff  = document.getElementById('cb-effect');
+
+  cbox.classList.remove('locked');
+  cbox.classList.add('available');
+  chk.disabled = false;
+  note.textContent = 'Se assinalado: +10 pts — incentiva o uso do estacionamento em vez do passeio, preservando a mobilidade pedonal';
+  eff.textContent = '+10 pts';
+
+  refreshRoPts();
+  update();
+}
+
+function toggleComfort() {
+  var chk = document.getElementById('chk-comfort');
+  if (chk.disabled) return;
+  chk.checked = !chk.checked;
+  comfortChecked = chk.checked;
+  var cbox = document.getElementById('cbox');
+  cbox.classList.toggle('ticked', comfortChecked);
+  refreshRoPts();
+  update();
+}
+
+function refreshRoPts() {
+  document.getElementById('rp0').textContent = (comfortChecked && wBand === 'narrow') ? '35 pts' : '25 pts';
+  document.getElementById('rp1').textContent = (comfortChecked && wBand === 'mid')    ? '25 pts' : '15 pts';
+  document.getElementById('rp2').textContent = (comfortChecked && wBand === 'wide')   ? '15 pts' : '5 pts';
+}
+
+function getCategory(total) {
+  if (total >= 75) return {
+    letter: 'A', cls: 'cat-A', color: '#0F6E56',
+    name: 'Muito provável',
+    desc: 'Os dados indicam condições muito favoráveis e baixa probabilidade de impacto significativo nos residentes ou no estacionamento. A equipa técnica poderá confirmar com uma visita sumária ao local.'
+  };
+  if (total >= 55) return {
+    letter: 'B', cls: 'cat-B', color: '#3B6D11',
+    name: 'Provável',
+    desc: 'Os dados indicam condições favoráveis e impacto moderado e controlável. Recomenda-se visita de confirmação ao local antes da decisão.'
+  };
+  if (total >= 35) return {
+    letter: 'C', cls: 'cat-C', color: '#854F0B',
+    name: 'Requer análise rigorosa',
+    desc: 'Os dados apresentam condicionantes que não permitem uma avaliação segura à distância. A equipa técnica deve realizar uma análise presencial aprofundada antes de qualquer decisão.'
+  };
+  return {
+    letter: 'D', cls: 'cat-D', color: '#A32D2D',
+    name: 'Difícil',
+    desc: 'Os dados indicam condições desfavoráveis, com elevada probabilidade de impacto nos residentes e/ou no estacionamento. Qualquer aprovação requer justificação reforçada e análise muito cuidadosa.'
+  };
+}
+
+function update() {
+  var h = parseInt(document.getElementById('sel-h').value);
+  var p = parseInt(document.getElementById('sel-p').value);
+  var w = getWPts();
+  var total = h + p + w;
+
+  document.getElementById('r-h').textContent = h;
+  document.getElementById('r-p').textContent = p;
+  document.getElementById('r-w').textContent = w;
+
+  var cat = getCategory(total);
+  var cd = document.getElementById('cat-display');
+  cd.className = 'cat-display ' + cat.cls;
+  document.getElementById('cd-letter').textContent = cat.letter;
+  document.getElementById('cd-name').textContent   = cat.name;
+  document.getElementById('cd-desc').textContent   = cat.desc;
+  document.getElementById('cd-score').textContent  = 'Pontuação: ' + total + ' / 110';
+
+  var pf = document.getElementById('pfill');
+  pf.style.width = Math.min(100, Math.round(total / 110 * 100)) + '%';
+  pf.style.background = cat.color;
+}
+
+update();
+</script>
+</body>
+</html>
