@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador · Esplanadas em Estacionamento · Arroios 2026</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#f2f1ee; --surface:#ffffff; --s1:#f8f7f5;
+  --border:#e0ded8; --border2:#c5c3bc;
+  --text:#111110; --text2:#52514e; --text3:#898781;
+  --green:#0F6E56; --green2:#3B6D11;
+  --green-bg:#E1F5EE; --green2-bg:#EAF3DE;
+  --blue:#185FA5; --blue-bg:#E6F1FB;
+  --amber:#854F0B; --amber-bg:#FAEEDA;
+  --red:#A32D2D; --red-bg:#FCEBEB;
+  --r:8px;
+}
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',sans-serif; background:var(--bg); color:var(--text); line-height:1.5; min-height:100vh; padding:32px 16px 72px; }
+.container { max-width:780px; margin:0 auto; }
+
+.page-header { margin-bottom:36px; border-left:3px solid var(--green); padding-left:16px; }
+.kicker { font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--text3); margin-bottom:6px; }
+.page-header h1 { font-size:22px; font-weight:700; color:var(--text); margin-bottom:4px; }
+.page-header .sub { font-size:13px; color:var(--text2); }
+
+.orientation-note { background:var(--blue-bg); border:0.5px solid #B5D4F4; border-radius:var(--r); padding:11px 15px; margin-bottom:28px; font-size:13px; color:#0C447C; line-height:1.55; }
+
+.slabel { font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--text3); margin:28px 0 12px; display:flex; align-items:center; gap:8px; }
+.slabel::after { content:''; flex:1; height:0.5px; background:var(--border); }
+
+.card { background:var(--surface); border:0.5px solid var(--border); border-radius:12px; padding:20px 22px; margin-bottom:12px; }
+
+.crit-head { display:flex; align-items:center; justify-content:space-between; padding-bottom:14px; margin-bottom:14px; border-bottom:0.5px solid var(--border); gap:12px; }
+.crit-head-left { display:flex; align-items:center; gap:10px; }
+.crit-icon { width:34px; height:34px; border-radius:var(--r); display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
+.crit-title { font-size:15px; font-weight:600; color:var(--text); }
+.crit-sub { font-size:12px; color:var(--text3); margin-top:1px; }
+.crit-right { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.badge { font-size:12px; font-weight:500; padding:3px 10px; border-radius:100px; white-space:nowrap; }
+.pts-note { font-size:13px; color:var(--text2); white-space:nowrap; }
+
+.bands { border:0.5px solid var(--border); border-radius:var(--r); overflow:hidden; }
+.band { display:grid; grid-template-columns:1.6fr 1fr 52px; padding:10px 14px; align-items:center; gap:10px; border-bottom:0.5px solid var(--border); }
+.band:last-child { border-bottom:none; }
+.b-range { font-size:14px; font-weight:500; color:var(--text); }
+.b-desc { font-size:12px; color:var(--text2); }
+.b-pts { font-size:15px; font-weight:700; text-align:right; }
+.pt-a{color:var(--green);} .pt-b{color:var(--green2);} .pt-c{color:var(--blue);} .pt-d{color:var(--amber);} .pt-e{color:var(--text3);}
+
+.formula-box { background:var(--blue-bg); border:0.5px solid #B5D4F4; border-radius:var(--r); padding:13px 16px; margin-bottom:12px; }
+.formula-title { font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:#185FA5; margin-bottom:10px; }
+.formula-body { display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
+.formula-fraction { flex:1; min-width:200px; text-align:center; }
+.formula-num { font-size:13px; font-weight:500; color:#0C447C; padding-bottom:6px; }
+.formula-bar { height:1.5px; background:#185FA5; margin:0 auto; max-width:340px; }
+.formula-den { font-size:13px; font-weight:500; color:#0C447C; padding-top:6px; }
+.formula-scope { font-size:12px; color:#185FA5; border-left:2px solid #185FA5; padding-left:10px; flex-shrink:0; max-width:220px; line-height:1.5; }
+
+.matrix-table { width:100%; border-collapse:collapse; font-size:13px; border:0.5px solid var(--border); border-radius:var(--r); overflow:hidden; }
+.matrix-table th { background:var(--s1); padding:10px 13px; font-weight:600; font-size:12px; color:var(--text2); text-align:left; border-bottom:0.5px solid var(--border); border-right:0.5px solid var(--border); }
+.matrix-table th:last-child { border-right:none; }
+.matrix-table td { padding:10px 13px; border-bottom:0.5px solid var(--border); border-right:0.5px solid var(--border); vertical-align:middle; }
+.matrix-table td:last-child { border-right:none; }
+.matrix-table tr:last-child td { border-bottom:none; }
+.pts-cell { font-weight:700; font-size:15px; text-align:center; }
+.pts-max{color:var(--green);} .pts-high{color:var(--green2);} .pts-mid{color:var(--blue);} .pts-low{color:var(--amber);}
+.th-sub { font-size:11px; font-weight:400; color:var(--text3); display:block; margin-top:2px; line-height:1.4; }
+.note-strip { font-size:12px; color:var(--text2); background:var(--s1); border-left:3px solid var(--border2); padding:9px 13px; border-radius:0 var(--r) var(--r) 0; margin-top:12px; }
+
+.cat-legend { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+@media(max-width:560px){ .cat-legend { grid-template-columns:repeat(2,1fr); } }
+.cat-item { border-radius:var(--r); padding:12px; border:0.5px solid; }
+.cat-item .ci-letter { font-size:28px; font-weight:800; line-height:1; margin-bottom:4px; }
+.cat-item .ci-name { font-size:12px; font-weight:600; margin-bottom:3px; }
+.cat-item .ci-range { font-size:11px; opacity:.7; margin-bottom:6px; }
+.cat-item .ci-desc { font-size:11px; line-height:1.45; opacity:.85; }
+.cat-A{background:var(--green-bg); border-color:#9FE1CB; color:var(--green);}
+.cat-B{background:var(--green2-bg); border-color:#C0DD97; color:var(--green2);}
+.cat-C{background:var(--amber-bg); border-color:#FAC775; color:var(--amber);}
+.cat-D{background:var(--red-bg); border-color:#F7C1C1; color:var(--red);}
+
+.sim-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+@media(max-width:600px){ .sim-grid { grid-template-columns:1fr; } }
+.form-group { margin-bottom:0; }
+.form-group > label { display:block; font-size:11px; font-weight:700; letter-spacing:.06em; color:var(--text3); margin-bottom:7px; text-transform:uppercase; }
+.form-group select { width:100%; padding:9px 32px 9px 12px; border:0.5px solid var(--border2); border-radius:var(--r); font-size:14px; color:var(--text); background:white; appearance:none; -webkit-appearance:none; cursor:pointer; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23898781' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 11px center; }
+.form-group select:focus { outline:2px solid var(--blue); outline-offset:1px; }
+
+.radio-group { display:flex; flex-direction:column; gap:6px; }
+.ro { display:flex; align-items:center; gap:10px; padding:10px 13px; border:0.5px solid var(--border); border-radius:var(--r); cursor:pointer; transition:all .1s; user-select:none; }
+.ro:hover { background:var(--s1); }
+.ro.active { border-color:var(--amber); background:var(--amber-bg); }
+.ro input[type=radio] { width:15px; height:15px; cursor:pointer; accent-color:var(--amber); flex-shrink:0; }
+.ro .ro-inner { flex:1; }
+.ro .ro-name { font-size:13px; font-weight:600; color:var(--text); }
+.ro .ro-desc { font-size:11px; color:var(--text2); margin-top:1px; }
+.ro .ro-pts { font-size:13px; font-weight:700; color:var(--amber); flex-shrink:0; white-space:nowrap; }
+
+.comfort-box { margin-top:8px; padding:11px 13px; border:0.5px solid var(--border); border-radius:var(--r); transition:all .12s; cursor:pointer; }
+.comfort-box:hover { background:var(--s1); }
+.comfort-box.ticked { border-color:var(--green); background:var(--green-bg); }
+.cb-inner { display:flex; align-items:flex-start; gap:9px; }
+.cb-inner input[type=checkbox] { width:15px; height:15px; accent-color:var(--green); flex-shrink:0; margin-top:2px; cursor:pointer; }
+.cb-text { flex:1; }
+.cb-name { font-size:13px; font-weight:600; color:var(--text); }
+.cb-sub { font-size:11px; color:var(--text2); margin-top:2px; line-height:1.45; }
+.cb-effect { font-size:12px; font-weight:700; color:var(--green); flex-shrink:0; white-space:nowrap; padding-top:2px; }
+.cb-note { font-size:11px; color:var(--text3); margin-top:7px; padding-top:7px; border-top:0.5px solid var(--border); line-height:1.45; }
+
+/* MAP */
+.map-section { margin-top:18px; padding-top:18px; border-top:0.5px solid var(--border); }
+.map-label { font-size:11px; font-weight:700; letter-spacing:.06em; color:var(--text3); text-transform:uppercase; margin-bottom:8px; }
+#map { height:340px; border:0.5px solid var(--border2); border-radius:var(--r); overflow:hidden; }
+.map-selected-info { margin-top:8px; padding:9px 13px; background:var(--s1); border:0.5px solid var(--border); border-radius:var(--r); font-size:13px; color:var(--text2); display:none; }
+.map-selected-info .msi-name { font-weight:600; color:var(--text); }
+.map-selected-info .msi-racio { color:var(--blue); font-weight:600; }
+.map-legend { display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:8px; }
+.ml-item { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--text2); }
+.ml-dot { width:11px; height:11px; border-radius:2px; flex-shrink:0; }
+
+/* RESULTS */
+.results-card { background:var(--surface); border:0.5px solid var(--border); border-radius:12px; overflow:hidden; }
+.results-head { padding:14px 22px; border-bottom:0.5px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.results-head h2 { font-size:14px; font-weight:600; color:var(--text); }
+.results-head .rh-note { font-size:12px; color:var(--text3); }
+.results-body { padding:22px; }
+.score-tiles { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px; }
+@media(max-width:500px){ .score-tiles { grid-template-columns:1fr; } }
+.stile { background:var(--s1); border:0.5px solid var(--border); border-radius:var(--r); padding:11px; text-align:center; }
+.stile .st-label { font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text3); display:block; margin-bottom:4px; }
+.stile .st-val { font-size:22px; font-weight:700; color:var(--text); line-height:1.1; }
+.stile .st-max { font-size:12px; color:var(--text3); }
+.cat-display { border-radius:12px; padding:20px 22px; margin-bottom:16px; display:flex; align-items:flex-start; gap:18px; border:1px solid; }
+.cd-letter { font-size:56px; font-weight:800; line-height:1; flex-shrink:0; width:68px; text-align:center; }
+.cd-body { flex:1; }
+.cd-name { font-size:16px; font-weight:700; margin-bottom:4px; }
+.cd-desc { font-size:13px; line-height:1.55; opacity:.9; }
+.cd-score { font-size:12px; margin-top:8px; opacity:.7; font-weight:500; }
+.progress-wrap { margin-bottom:0; }
+.progress-labels { display:flex; justify-content:space-between; font-size:11px; color:var(--text3); margin-bottom:5px; }
+.progress-track { height:8px; background:var(--border); border-radius:5px; overflow:hidden; position:relative; }
+.progress-fill { height:100%; border-radius:5px; transition:width .35s ease,background .35s; }
+.cat-markers { position:relative; height:18px; margin-top:2px; }
+.cat-marker { position:absolute; top:4px; font-size:10px; font-weight:700; transform:translateX(-50%); color:var(--text3); }
+.cat-mark-line { position:absolute; top:0; bottom:0; width:1px; background:var(--border2); pointer-events:none; }
+
+.footer { text-align:center; font-size:11px; color:var(--text3); margin-top:40px; }
+@media print { body{background:white;padding:16px;} .card,.results-card{box-shadow:none;} .sim-only{display:none!important;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="page-header">
+  <div class="kicker">Junta de Freguesia de Arroios · Regulamento 2026</div>
+  <h1>Esplanadas em Lugares de Estacionamento</h1>
+  <div class="sub">Instrumento de orientação para avaliação de pedidos — Versão simplificada</div>
+</div>
+
+<div class="orientation-note">
+  ℹ️ <strong>Instrumento de orientação, não de decisão.</strong> Esta ferramenta atribui uma categoria (A–D) com base em dados objetivos, para dar uma primeira ideia da viabilidade e ser transparente. A categoria serve de base para a equipa técnica ir ao local e analisar o pedido de forma fundamentada antes de qualquer decisão.
+</div>
+
+<div class="slabel">Critérios de avaliação</div>
+
+<!-- Horário -->
+<div class="card">
+  <div class="crit-head">
+    <div class="crit-head-left">
+      <div class="crit-icon" style="background:var(--green-bg);">🕐</div>
+      <div><div class="crit-title">Horário de encerramento</div><div class="crit-sub">Encerramento mais cedo = menor impacto noturno = maior pontuação</div></div>
+    </div>
+    <div class="crit-right">
+      <span class="badge" style="background:var(--green-bg);color:var(--green);">Peso 50%</span>
+      <span class="pts-note">máx. <strong>50</strong> pts</span>
+    </div>
+  </div>
+  <div class="bands">
+    <div class="band"><span class="b-range">Fecha até às 20h00</span><span class="b-desc">Antes do entardecer</span><span class="b-pts pt-a">50</span></div>
+    <div class="band"><span class="b-range">Fecha entre 20h00 e 22h00</span><span class="b-desc">Horário-regra do regulamento</span><span class="b-pts pt-b">35</span></div>
+    <div class="band"><span class="b-range">Fecha entre 22h00 e 24h00</span><span class="b-desc">Regime excecional — impacto elevado em zonas habitacionais</span><span class="b-pts pt-d">15</span></div>
+    <div class="band"><span class="b-range">Fecha após as 24h00</span><span class="b-desc">Período noturno — impacto máximo nos residentes</span><span class="b-pts pt-e">0</span></div>
+  </div>
+</div>
+
+<!-- Pressão -->
+<div class="card">
+  <div class="crit-head">
+    <div class="crit-head-left">
+      <div class="crit-icon" style="background:var(--blue-bg);">🚗</div>
+      <div><div class="crit-title">Pressão de estacionamento</div><div class="crit-sub">Taxa de ocupação da zona — menor pressão = mais pontuação</div></div>
+    </div>
+    <div class="crit-right">
+      <span class="badge" style="background:var(--blue-bg);color:var(--blue);">Peso 25%</span>
+      <span class="pts-note">máx. <strong>25</strong> pts</span>
+    </div>
+  </div>
+  <div class="formula-box">
+    <div class="formula-title">Como se calcula a taxa de pressão de estacionamento</div>
+    <div class="formula-body">
+      <div class="formula-fraction">
+        <div class="formula-num">N.º de dísticos de residente ou família numerosa emitidos pela EMEL</div>
+        <div class="formula-bar"></div>
+        <div class="formula-den">N.º de alojamentos familiares clássicos de residência habitual (INE)</div>
+      </div>
+      <div class="formula-scope">Ambos os valores à escala da <strong>secção estatística do INE</strong> correspondente ao local do pedido</div>
+    </div>
+  </div>
+  <div class="bands">
+    <div class="band"><span class="b-range">Taxa ≤ 0,4</span><span class="b-desc">Pressão muito baixa — impacto mínimo para residentes</span><span class="b-pts pt-a">25</span></div>
+    <div class="band"><span class="b-range">Taxa &gt; 0,4 e ≤ 0,6</span><span class="b-desc">Pressão moderada</span><span class="b-pts pt-b">15</span></div>
+    <div class="band"><span class="b-range">Taxa &gt; 0,6 e ≤ 0,8</span><span class="b-desc">Pressão elevada — zona com procura intensa</span><span class="b-pts pt-d">8</span></div>
+    <div class="band"><span class="b-range">Taxa &gt; 0,8</span><span class="b-desc">Pressão crítica — saturação de dísticos face aos alojamentos</span><span class="b-pts pt-e">0</span></div>
+  </div>
+</div>
+
+<!-- Passeio -->
+<div class="card">
+  <div class="crit-head">
+    <div class="crit-head-left">
+      <div class="crit-icon" style="background:var(--amber-bg);">🚶</div>
+      <div><div class="crit-title">Largura do passeio</div><div class="crit-sub">Passeio estreito justifica mais o uso do estacionamento — lógica invertida</div></div>
+    </div>
+    <div class="crit-right">
+      <span class="badge" style="background:var(--amber-bg);color:var(--amber);">Peso 25%</span>
+      <span class="pts-note">máx. <strong>35</strong> pts (c/ bónus)</span>
+    </div>
+  </div>
+  <table class="matrix-table">
+    <thead>
+      <tr>
+        <th style="width:32%;">Largura do passeio</th>
+        <th>Sem passeio confortável em frente<span class="th-sub">esplanada no estacionamento é a única ou melhor opção</span></th>
+        <th>Com passeio confortável em frente<span class="th-sub">+10 pts — incentiva esplanada no estacionamento em vez do passeio</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>≤ 2,0 m</strong><br><span style="font-size:11px;color:var(--text3);">Muito estreito</span></td>
+        <td class="pts-cell pts-max">25</td>
+        <td class="pts-cell" style="color:var(--green);font-weight:700;">35 <span style="font-size:11px;font-weight:400;">(25+10)</span></td>
+      </tr>
+      <tr>
+        <td><strong>2,0 m a 4,0 m</strong><br><span style="font-size:11px;color:var(--text3);">Médio</span></td>
+        <td class="pts-cell pts-mid">15</td>
+        <td class="pts-cell pts-max">25 <span style="font-size:11px;font-weight:400;">(15+10)</span></td>
+      </tr>
+      <tr>
+        <td><strong>&gt; 4,0 m</strong><br><span style="font-size:11px;color:var(--text3);">Largo</span></td>
+        <td class="pts-cell pts-low">5</td>
+        <td class="pts-cell pts-mid">15 <span style="font-size:11px;font-weight:400;">(5+10)</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="note-strip" style="margin-top:12px;">
+    ⚠️ Mínimo inderrogável: canal pedonal de 1,5 m após instalação (art.º 7.º/3). · 📋 DL 163/2006: passeios ≤ 2,0 m não permitem esplanada acessível no passeio — o bónus aplica-se igualmente nesse escalão.
+  </div>
+</div>
+
+<!-- Categorias -->
+<div class="slabel">Categorias de viabilidade</div>
+<div class="card">
+  <div class="cat-legend">
+    <div class="cat-item cat-A"><div class="ci-letter">A</div><div class="ci-name">Muito provável</div><div class="ci-range">75–110 pontos</div><div class="ci-desc">Dados muito favoráveis, baixo impacto esperado. Visita técnica de confirmação.</div></div>
+    <div class="cat-item cat-B"><div class="ci-letter">B</div><div class="ci-name">Provável</div><div class="ci-range">55–74 pontos</div><div class="ci-desc">Dados favoráveis, impacto controlável. Recomenda-se visita de confirmação.</div></div>
+    <div class="cat-item cat-C"><div class="ci-letter">C</div><div class="ci-name">Requer análise</div><div class="ci-range">35–54 pontos</div><div class="ci-desc">Dados com condicionantes. Análise rigorosa no local antes de qualquer decisão.</div></div>
+    <div class="cat-item cat-D"><div class="ci-letter">D</div><div class="ci-name">Difícil</div><div class="ci-range">0–34 pontos</div><div class="ci-desc">Dados desfavoráveis. Impacto elevado provável. Requer justificação reforçada.</div></div>
+  </div>
+</div>
+
+<!-- SIMULADOR -->
+<div class="slabel sim-only">Simulador</div>
+<div class="card sim-only">
+  <div class="sim-grid">
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div class="form-group">
+        <label for="sel-h">Horário de encerramento</label>
+        <select id="sel-h" onchange="update()">
+          <option value="50">Fecha até às 20h00</option>
+          <option value="35" selected>Fecha entre 20h00 e 22h00</option>
+          <option value="15">Fecha entre 22h00 e 24h00</option>
+          <option value="0">Fecha após as 24h00</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="sel-p">Pressão de estacionamento</label>
+        <select id="sel-p" onchange="update()">
+          <option value="25">Taxa ≤ 0,4 — pressão muito baixa</option>
+          <option value="15">Taxa &gt; 0,4 e ≤ 0,6 — moderada</option>
+          <option value="8" selected>Taxa &gt; 0,6 e ≤ 0,8 — elevada</option>
+          <option value="0">Taxa &gt; 0,8 — pressão crítica</option>
+        </select>
+        <div style="font-size:11px;color:var(--text3);margin-top:5px;">💡 Clique numa zona no mapa abaixo para preencher automaticamente</div>
+      </div>
+    </div>
+    <div>
+      <div class="form-group">
+        <label>Largura do passeio</label>
+        <div class="radio-group">
+          <label class="ro" id="ro0" onclick="pickW(0,'narrow')">
+            <input type="radio" name="pw" id="pw0" onchange="update()">
+            <div class="ro-inner"><div class="ro-name">≤ 2,0 m</div><div class="ro-desc">Muito estreito — única opção é o estacionamento</div></div>
+            <span class="ro-pts" id="rp0">25 pts</span>
+          </label>
+          <label class="ro active" id="ro1" onclick="pickW(1,'mid')">
+            <input type="radio" name="pw" id="pw1" checked onchange="update()">
+            <div class="ro-inner"><div class="ro-name">2,0 m a 4,0 m</div><div class="ro-desc">Médio — parcialmente justificado</div></div>
+            <span class="ro-pts" id="rp1">15 pts</span>
+          </label>
+          <label class="ro" id="ro2" onclick="pickW(2,'wide')">
+            <input type="radio" name="pw" id="pw2" onchange="update()">
+            <div class="ro-inner"><div class="ro-name">&gt; 4,0 m</div><div class="ro-desc">Largo — menos justificado sem bónus</div></div>
+            <span class="ro-pts" id="rp2">5 pts</span>
+          </label>
+        </div>
+      </div>
+      <div class="comfort-box" id="cbox" onclick="toggleComfort()">
+        <div class="cb-inner">
+          <input type="checkbox" id="chk-comfort">
+          <div class="cb-text">
+            <div class="cb-name">Passeio confortável em frente ao estabelecimento</div>
+            <div class="cb-sub">Existe espaço confortável no passeio onde habitualmente poderia estar uma esplanada de passeio — preferível incentivar esplanada no estacionamento</div>
+          </div>
+          <div class="cb-effect">+10 pts</div>
+        </div>
+        <div class="cb-note">Se assinalado: +10 pts — incentiva o uso do estacionamento em vez do passeio, preservando a mobilidade pedonal</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEAFLET MAP -->
+  <div class="map-section">
+    <div class="map-label">Selecionar zona estatística — clique para definir pressão de estacionamento</div>
+    <div id="map"></div>
+    <div class="map-selected-info" id="msi"></div>
+    <div class="map-legend">
+      <div class="ml-item"><div class="ml-dot" style="background:#0F6E56;"></div> Taxa ≤ 0,4 (25 pts)</div>
+      <div class="ml-item"><div class="ml-dot" style="background:#3B6D11;"></div> 0,4–0,6 (15 pts)</div>
+      <div class="ml-item"><div class="ml-dot" style="background:#C07A1A;"></div> 0,6–0,8 (8 pts)</div>
+      <div class="ml-item"><div class="ml-dot" style="background:#A32D2D;"></div> &gt; 0,8 (0 pts)</div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTADO -->
+<div class="slabel">Resultado</div>
+<div class="results-card">
+  <div class="results-head">
+    <h2>Avaliação orientativa</h2>
+    <span class="rh-note">pontuação 0–110 · categorias A–D</span>
+  </div>
+  <div class="results-body">
+    <div class="score-tiles">
+      <div class="stile"><span class="st-label">🕐 Horário</span><span class="st-val" id="r-h">35</span><span class="st-max">/ 50</span></div>
+      <div class="stile"><span class="st-label">🚗 Estacionamento</span><span class="st-val" id="r-p">8</span><span class="st-max">/ 25</span></div>
+      <div class="stile"><span class="st-label">🚶 Passeio</span><span class="st-val" id="r-w">15</span><span class="st-max">/ 35</span></div>
+    </div>
+    <div class="cat-display cat-B" id="cat-display">
+      <div class="cd-letter" id="cd-letter">B</div>
+      <div class="cd-body">
+        <div class="cd-name" id="cd-name">Provável</div>
+        <div class="cd-desc" id="cd-desc">Os dados indicam condições favoráveis e impacto moderado e controlável. Recomenda-se visita de confirmação ao local antes da decisão.</div>
+        <div class="cd-score" id="cd-score">Pontuação: 58 / 110</div>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-labels"><span>0</span><span>110</span></div>
+      <div class="progress-track" style="position:relative;">
+        <div class="progress-fill" id="pfill" style="width:53%;"></div>
+        <div class="cat-mark-line" style="left:31.8%;"></div>
+        <div class="cat-mark-line" style="left:50%;"></div>
+        <div class="cat-mark-line" style="left:68.2%;"></div>
+      </div>
+      <div class="cat-markers">
+        <span class="cat-marker" style="left:0%;transform:none;color:var(--red);">D</span>
+        <span class="cat-marker" style="left:31.8%;color:var(--amber);">C</span>
+        <span class="cat-marker" style="left:50%;color:var(--green2);">B</span>
+        <span class="cat-marker" style="left:68.2%;color:var(--green);">A</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Junta de Freguesia de Arroios · Regulamento de Esplanadas em Estacionamento · Julho 2026<br>
+  Instrumento de trabalho interno — não substitui análise técnica nem o regulamento aprovado
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+var GEOJSON={"type":"FeatureCollection","name":"Disticos_N_ALOJAMENTOS_FAM_CLASS_RHABITUAL_Arroios","crs":{"type":"name","properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}},"features":[{"type":"Feature","properties":{"codigo":"008","zona":"Alameda","disticos_residentes":1075,"disticos_familia_numerosa":1,"disticos_total":1076,"N_ALOJAMENTOS_FAM_CLASS_RHABITUAL":1365,"aloj_rhab_ponderado":1364.7,"n_bgri_contrib":20,"Racio":0.79},"geometry":{"type":"Polygon","coordinates":[[[-9.131261,38.734279],[-9.131238,38.734736],[-9.131231,38.73509],[-9.131206,38.735747],[-9.131168,38.736786],[-9.131176,38.737005],[-9.131184,38.737223],[-9.132976,38.737114],[-9.133857,38.737061],[-9.133888,38.737059],[-9.134423,38.737026],[-9.136301,38.736912],[-9.136247,38.736384],[-9.136305,38.73638],[-9.136356,38.73635],[-9.136388,38.736178],[-9.136736,38.734572],[-9.136809,38.734471],[-9.135539,38.733999],[-9.135321,38.733929],[-9.134612,38.733753],[-9.134512,38.733879],[-9.134353,38.733959],[-9.134165,38.733978],[-9.134029,38.733944],[-9.134018,38.733941],[-9.133985,38.733932],[-9.133848,38.73383],[-9.133781,38.733691],[-9.133781,38.733539],[-9.132253,38.73315],[-9.131717,38.733013],[-9.131443,38.733672],[-9.131283,38.733829],[-9.131261,38.734279]]]}},{"type":"Feature","properties":{"codigo":"009","zona":"Chile","disticos_residentes":2252,"disticos_familia_numerosa":6,"disticos_total":2258,"N_ALOJAMENTOS_FAM_CLASS_RHABITUAL":3083,"aloj_rhab_ponderado":3083.3,"n_bgri_contrib":37,"Racio":0.73},"geometry":{"type":"Polygon","coordinates":[[[-9.135321,38.733929],[-9.135539,38.733999],[-9.136809,38.734471],[-9.136966,38.734259],[-9.137629,38.733376],[-9.137746,38.733272],[-9.13823,38.732761],[-9.138258,38.732731],[-9.138303,38.732721],[-9.138356,38.732709],[-9.138391,38.732701],[-9.138417,38.732703],[-9.140388,38.732851],[-9.140374,38.732955],[-9.141039,38.732998],[-9.140821,38.731958],[-9.140547,38.731799],[-9.140509,38.731602],[-9.140695,38.731396],[-9.140307,38.729574],[-9.139672,38.729668],[-9.139325,38.729772],[-9.139465,38.730614],[-9.139435,38.73064],[-9.138748,38.730546],[-9.138186,38.730462],[-9.136246,38.730525],[-9.136191,38.730359],[-9.136182,38.730135],[-9.136217,38.729626],[-9.134776,38.729534],[-9.13488,38.72833],[-9.134589,38.728314],[-9.134335,38.7283],[-9.134303,38.728661],[-9.133995,38.728644],[-9.134027,38.728283],[-9.133911,38.728276],[-9.133659,38.728289],[-9.133511,38.728324],[-9.133418,38.728346],[-9.132884,38.728572],[-9.13284,38.728591],[-9.13295,38.728747],[-9.13298,38.728789],[-9.133052,38.729016],[-9.133055,38.729024],[-9.133057,38.72903],[-9.133089,38.729131],[-9.132996,38.729406],[-9.132991,38.729457],[-9.132969,38.729651],[-9.132865,38.730218],[-9.132965,38.730164],[-9.133054,38.730116],[-9.13306,38.730112],[-9.133066,38.730109],[-9.133113,38.730084],[-9.133058,38.730194],[-9.13294,38.730432],[-9.132869,38.730578],[-9.132173,38.732049],[-9.131733,38.732976],[-9.131724,38.732995],[-9.131723,38.732998],[-9.131717,38.733013],[-9.133781,38.733539],[-9.133781,38.733691],[-9.133848,38.73383],[-9.133985,38.733932],[-9.134029,38.733944],[-9.134165,38.733978],[-9.134353,38.733959],[-9.134512,38.733879],[-9.134612,38.733753],[-9.135321,38.733929]]]}},{"type":"Feature","properties":{"codigo":"010","zona":"Avenidas Novas","disticos_residentes":1374,"disticos_familia_numerosa":5,"disticos_total":1379,"N_ALOJAMENTOS_FAM_CLASS_RHABITUAL":1420,"aloj_rhab_ponderado":1419.6,"n_bgri_contrib":34,"Racio":0.97},"geometry":{"type":"Polygon","coordinates":[[[-9.152257,38.735066],[-9.152316,38.734968],[-9.15256,38.734894],[-9.152618,38.734948],[-9.152725,38.734966],[-9.152841,38.734924],[-9.152907,38.734865],[-9.152923,38.734784],[-9.153156,38.734721],[-9.153175,38.734715],[-9.153188,38.734715],[-9.153223,38.734714],[-9.153274,38.73472],[-9.15307,38.734526],[-9.153614,38.734358],[-9.15369,38.734317],[-9.148449,38.728148],[-9.148359,38.728042],[-9.148243,38.728221],[-9.145199,38.733196],[-9.145196,38.733195],[-9.145175,38.733188],[-9.145168,38.733185],[-9.145154,38.73318],[-9.145133,38.733174],[-9.145111,38.733168],[-9.145089,38.733162],[-9.145067,38.733157],[-9.145045,38.733152],[-9.145023,38.733148],[-9.145,38.733145],[-9.144978,38.733142],[-9.144955,38.733139],[-9.144932,38.733137],[-9.144909,38.733135],[-9.144887,38.733134],[-9.144864,38.733134],[-9.144841,38.733134],[-9.144818,38.733134],[-9.144795,38.733135],[-9.144772,38.733136],[-9.144749,38.733138],[-9.144726,38.733141],[-9.144704,38.733144],[-9.144681,38.733147],[-9.144659,38.733151],[-9.144637,38.733156],[-9.144615,38.733161],[-9.144593,38.733167],[-9.144571,38.733172],[-9.14455,38.733179],[-9.144529,38.733186],[-9.144508,38.733193],[-9.144487,38.733201],[-9.144467,38.73321],[-9.144447,38.733218],[-9.144427,38.733228],[-9.144416,38.733233],[-9.144408,38.733237],[-9.144389,38.733247],[-9.14437,38.733258],[-9.144352,38.733269],[-9.144334,38.73328],[-9.144317,38.733292],[-9.1443,38.733304],[-9.144283,38.733316],[-9.144267,38.733329],[-9.144252,38.733342],[-9.144236,38.733356],[-9.144222,38.73337],[-9.144208,38.733384],[-9.144194,38.733399],[-9.144181,38.733413],[-9.144169,38.733428],[-9.144157,38.733444],[-9.144146,38.733459],[-9.144135,38.733475],[-9.144125,38.733491],[-9.144115,38.733508],[-9.144106,38.733524],[-9.144098,38.733541],[-9.14409,38.733558],[-9.144083,38.733575],[-9.144076,38.733592],[-9.14407,38.73361],[-9.144065,38.733627],[-9.14406,38.733645],[-9.144056,38.733662],[-9.144053,38.73368],[-9.14405,38.733698],[-9.144048,38.733716],[-9.144047,38.733734],[-9.144046,38.733752],[-9.144046,38.73377],[-9.144047,38.733788],[-9.144048,38.733806],[-9.14405,38.733824],[-9.144052,38.733842],[-9.144056,38.733859],[-9.144059,38.733877],[-9.144064,38.733895],[-9.144069,38.733912],[-9.144075,38.73393],[-9.144081,38.733947],[-9.144088,38.733964],[-9.144096,38.733981],[-9.144104,38.733998],[-9.144113,38.734014],[-9.144122,38.734031],[-9.144132,38.734047],[-9.144143,38.734063],[-9.144154,38.734078],[-9.144166,38.734094],[-9.144178,38.734109],[-9.144191,38.734124],[-9.144205,38.734138],[-9.144219,38.734153],[-9.144233,38.734167],[-9.144248,38.73418],[-9.144264,38.734194],[-9.14428,38.734206],[-9.144296,38.734219],[-9.144313,38.734231],[-9.14433,38.734243],[-9.144348,38.734254],[-9.144366,38.734266],[-9.144384,38.734276],[-9.144403,38.734286],[-9.144423,38.734296],[-9.144442,38.734305],[-9.144462,38.734314],[-9.144482,38.734323],[-9.144503,38.734331],[-9.144524,38.734338],[-9.144545,38.734345],[-9.144566,38.734352],[-9.144588,38.734358],[-9.14461,38.734364],[-9.144632,38.734369],[-9.144646,38.734372],[-9.144654,38.734373],[-9.144676,38.734377],[-9.144699,38.734381],[-9.144721,38.734384],[-9.144744,38.734387],[-9.144767,38.734389],[-9.14479,38.73439],[-9.144813,38.734392],[-9.144835,38.734392],[-9.144858,38.734392],[-9.144881,38.734392],[-9.144904,38.734391],[-9.144927,38.734389],[-9.14495,38.734387],[-9.144967,38.734385],[-9.144973,38.734385],[-9.144995,38.734382],[-9.145016,38.734379],[-9.145175,38.735033],[-9.145515,38.735024],[-9.148021,38.734961],[-9.148944,38.734937],[-9.151977,38.734861],[-9.152225,38.734785],[-9.152257,38.735066]]]}},{"type":"Feature","properties":{"codigo":"014","zona":"Pra\u00e7a Jos\u00e9 Fontana","disticos_residentes":1278,"disticos_familia_numerosa":5,"disticos_total":1283,"N_ALOJAMENTOS_FAM_CLASS_RHABITUAL":1576,"aloj_rhab_ponderado":1575.5,"n_bgri_contrib":39,"Racio":0.81},"geometry":{"type":"Polygon","coordinates":[[[-9.146124,38.724775],[-9.14609,38.725617],[-9.146081,38.725668],[-9.146069,38.725702],[-9.145987,38.725836],[-9.145956,38.725868],[-9.145875,38.725931],[-9.144063,38.727323],[-9.14361,38.72767],[-9.143545,38.727707],[-9.143485,38.727728],[-9.143404,38.727737],[-9.143202,38.727726],[-9.142365,38.727678],[-9.140766,38.727603],[-9.140457,38.727588],[-9.140219,38.72915],[-9.140307,38.729574],[-9.140695,38.731396],[-9.140942,38.73137],[-9.141207,38.731514],[-9.141601,38.731657],[-9.144416,38.733233],[-9.144427,38.733228],[-9.144447,38.733218],[-9.144467,38.73321],[-9.144487,38.733201],[-9.144508,38.733193],[-9.144529,38.733186],[-9.14455,38.733179],[-9.144571,38.733172],[-9.144593,38.733167],[-9.144615,38.733161],[-9.144637,38.733156],[-9.144659,38.733151],[-9.144681,38.733147],[-9.144704,38.733144],[-9.144726,38.733141],[-9.144749,38.733138],[-9.144772,38.733136],[-9.144795,38.733135],[-9.144818,38.733134],[-9.144841,38.733134],[-9.144864,38.733134],[-9.144887,38.733134],[-9.144909,38.733135],[-9.144932,38.733137],[-9.144955,38.733139],[-9.144978,38.733142],[-9.145,38.733145],[-9.145023,38.733148],[-9.145045,38.733152],[-9.145067,38.733157],[-9.145089,38.733162],[-9.145111,38.733168],[-9.145133,38.733174],[-9.145154,38.73318],[-9.145168,38.733185],[-9.145175,38.733188],[-9.145196,38.733195],[-9.145199,38.733196],[-9.148243,38.728221],[-9.148213,38.72821],[-9.148057,38.728153],[-9.147926,38.727973],[-9.148013,38.727631],[-9.148116,38.727471],[-9.147881,38.727379],[-9.147902,38.727347],[-9.147965,38.727247],[-9.147933,38.727169],[-9.147507,38.727272],[-9.147275,38.726682],[-9.14677,38.725546],[-9.146369,38.725088],[-9.146124,38.724775]]]}},{"type":"Feature","properties":{"codigo":"017","zona":"Estef\u00e2nia","disticos_residentes":1486,"disticos_familia_numerosa":5,"disticos_total":1491,"N_ALOJAMENTOS_FAM_CLASS_RHABITUAL":1601,"aloj_rhab_ponderado":1601.1,"n_bgri_contrib":35,"Racio":0.93},"geometry":{"type":"Polygon","coordinates":[[[-9.141625,38.735245],[-9.141804,38.736084],[-9.141955,38.736796],[-9.142087,38.737414],[-9.142134,38.737634],[-9.145316,38.737169],[-9.145679,38.737116],[-9.145175,38.735033],[-9.145016,38.734379],[-9.144995,38.734382],[-9.144973,38.734385],[-9.144967,38.734385],[-9.14495,38.734387],[-9.144927,38.734389],[-9.144904,38.734391],[-9.144881,38.734392],[-9.144858,38.734392],[-9.144835,38.734392],[-9.144813,38.734392],[-9.14479,38.73439],[-9.144767,38.734389],[-9.144744,38.734387],[-9.144721,38.734384],[-9.144699,38.734381],[-9.144676,38.734377],[-9.144654,38.734373],[-9.144646,38.734372],[-9.144632,38.734369],[-9.14461,38.734364],[-9.144588,38.734358],[-9.144566,38.734352],[-9.144545,38.734345],[-9.144524,38.734338],[-9.144503,38.734331],[-9.144482,38.734323],[-9.144462,38.734314],[-9.144442,38.734305],[-9.144423,38.734296],[-9.144403,38.734286],[-9.144384,38.734276],[-9.144366,38.734266],[-9.144348,38.734254],[-9.14433,38.734243],[-9.144313,38.734231],[-9.144296,38.734219],[-9.14428,38.734206],[-9.144264,38.734194],[-9.144248,38.73418],[-9.144233,38.734167],[-9.144219,38.734153],[-9.144205,38.734138],[-9.144191,38.734124],[-9.144178,38.734109],[-9.144166,38.734094],[-9.144154,38.734078],[-9.144143,38.734063],[-9.144132,38.734047],[-9.144122,38.734031],[-9.144113,38.734014],[-9.144104,38.733998],[-9.144096,38.733981],[-9.144088,38.733964],[-9.144081,38.733947],[-9.144075,38.73393],[-9.144069,38.733912],[-9.144064,38.733895],[-9.144059,38.733877],[-9.144056,38.733859],[-9.144052,38.733842],[-9.14405,38.733824],[-9.144048,38.733806],[-9.144047,38.733788],[-9.144046,38.73377],[-9.144046,38.733752],[-9.144047,38.733734],[-9.144048,38.733716],[-9.14405,38.733698],[-9.144053,38.73368],[-9.144056,38.733662],[-9.14406,38.733645],[-9.144065,38.733627],[-9.14407,38.73361],[-9.144076,38.733592],[-9.144083,38.733575],[-9.14409,38.733558],[-9.144098,38.733541],[-9.144106,38.733524],[-9.144115,38.733508],[-9.144125,38.733491],[-9.144135,38.733475],[-9.144146,38.733459],[-9.144157,38.733444],[-9.144169,38.733428],[-9.144181,38.733413],[-9.144194,38.733399],[-9.144208,38.733384],[-9.144222,38.73337],[-9.144236,38.733356],[-9.144252,38.733342],[-9.144267,38.733329],[-9.144283,38.733316],[-9.1443,38.733304],[-9.144317,38.733292],[-9.144334,38.73328],[-9.144352,38.733269],[-9.14437,38.733258],[-9.144389,38.733247],[-9.144408,38.733237],[-9.144416,38.733233],[-9.141601,38.731657],[-9.141207,38.731514],[-9.140942,38.73137],[-9.140695,38.731396],[-9.140509,38.731602],[-9.140547,38.731799],[-9.140821,38.731958],[-9.141039,38.732998],[-9.140374,38.732955],[-9.140388,38.732851],[-9.138417,38.732703],[-9.138391,38.732701],[-9.138356,38.732709],[-9.138303,38.732721],[-9.138258,38.732731],[-9.13823,38.732761],[-9.137746,38.733272],[-9.137629,38.733376],[-9.136966,38.734259],[-9.136809,38.734471],[-9.136736,38.734572],[-9.136388,38.736178],[-9.136356,38.73635],[-9.136305,38.73638],[-9.136247,38.736384],[-9.136301,38.736912],[-9.136503,38.7369],[-9.136526,38.736899],[-9.136492,38.736595],[-9.136486,38.736422],[-9.136486,38.736402],[-9.136518,38.736293],[-9.136574,38.736136],[-9.136677,38.736037],[-9.136698,38.736026],[-9.136971,38.735881],[-9.137133,38.735794],[-9.137449,38.735631],[-9.138092,38.735403],[-9.138364,38.735348],[-9.139124,38.735297],[-9.14162,38.735222],[-9.141625,38.735245]]]}},{"type":"Feature","properties":{"codigo":"025","zona":"Campo Santana","disticos_residentes":1419,"disticos_familia_numerosa":1,"disticos_total":1420,"N_ALOJAMENTOS_FAM_CLASS_RHABITUAL":1887,"aloj_rhab_ponderado":1886.6,"n_bgri_contrib":29,"Racio":0.75},"geometry":{"type":"Polygon","coordinates":[[[-9.14026,38.720164],[-9.13982,38.720312],[-9.139315,38.720651],[-9.139435,38.721271],[-9.139337,38.722042],[-9.139316,38.722207],[-9.13918,38.722394],[-9.139417,38.7232],[-9.139516,38.723513],[-9.139767,38.7241],[-9.140173,38.724866],[-9.140247,38.724983],[-9.140311,38.725109],[-9.140356,38.725362],[-9.140358,38.725371],[-9.14036,38.72537],[-9.140419,38.725351],[-9.140568,38.725645],[-9.1406,38.726103],[-9.140615,38.726333],[-9.140625,38.726485],[-9.14047,38.727501],[-9.140457,38.727588],[-9.140766,38.727603],[-9.142365,38.727678],[-9.143202,38.727726],[-9.143404,38.727737],[-9.143485,38.727728],[-9.143545,38.727707],[-9.14361,38.72767],[-9.144063,38.727323],[-9.145875,38.725931],[-9.145956,38.725868],[-9.145987,38.725836],[-9.146069,38.725702],[-9.146081,38.725668],[-9.14609,38.725617],[-9.146124,38.724775],[-9.145989,38.724603],[-9.145687,38.723867],[-9.145611,38.72359],[-9.145595,38.723349],[-9.144768,38.72338],[-9.144215,38.723415],[-9.143775,38.723435],[-9.143584,38.723436],[-9.143583,38.723386],[-9.143635,38.723322],[-9.143781,38.723376],[-9.143899,38.723379],[-9.144283,38.723356],[-9.144261,38.723184],[-9.144204,38.723034],[-9.144112,38.722865],[-9.144054,38.722722],[-9.143762,38.721894],[-9.14371,38.7218],[-9.143533,38.721536],[-9.143484,38.721484],[-9.143412,38.721428],[-9.143146,38.721268],[-9.142954,38.721168],[-9.142682,38.720877],[-9.142575,38.720785],[-9.142529,38.720771],[-9.142394,38.72073],[-9.141937,38.720639],[-9.141815,38.720572],[-9.141348,38.720268],[-9.140454,38.720257],[-9.140349,38.720207],[-9.14026,38.720164]]]}},{"type":"Feature","properties":{"codigo":"037","zona":"Anjos","disticos_residentes":3064,"disticos_familia_numerosa":5,"disticos_total":3069,"N_ALOJAMENTOS_FAM_CLASS_RHABITUAL":4386,"aloj_rhab_ponderado":4386.3,"n_bgri_contrib":59,"Racio":0.7},"geometry":{"type":"Polygon","coordinates":[[[-9.138748,38.730546],[-9.139435,38.73064],[-9.139465,38.730614],[-9.139325,38.729772],[-9.139672,38.729668],[-9.140307,38.729574],[-9.140219,38.72915],[-9.140457,38.727588],[-9.14047,38.727501],[-9.140625,38.726485],[-9.140615,38.726333],[-9.1406,38.726103],[-9.140568,38.725645],[-9.140419,38.725351],[-9.14036,38.72537],[-9.140358,38.725371],[-9.140356,38.725362],[-9.140311,38.725109],[-9.140247,38.724983],[-9.140173,38.724866],[-9.139767,38.7241],[-9.139516,38.723513],[-9.139417,38.7232],[-9.13918,38.722394],[-9.139316,38.722207],[-9.139337,38.722042],[-9.139073,38.722022],[-9.13865,38.722231],[-9.13833,38.722187],[-9.138198,38.722271],[-9.138234,38.722306],[-9.13791,38.722522],[-9.137629,38.722727],[-9.13757,38.722677],[-9.136889,38.723221],[-9.136943,38.72326],[-9.136829,38.723352],[-9.136603,38.723269],[-9.136244,38.723265],[-9.135791,38.723375],[-9.135702,38.723154],[-9.135664,38.723084],[-9.135462,38.722778],[-9.135452,38.722763],[-9.135183,38.722648],[-9.135003,38.722571],[-9.133262,38.72245],[-9.132574,38.722399],[-9.132552,38.722397],[-9.132516,38.722514],[-9.132549,38.722533],[-9.132473,38.722753],[-9.132462,38.72277],[-9.132352,38.722872],[-9.132384,38.722893],[-9.131739,38.723298],[-9.131703,38.723321],[-9.131765,38.723584],[-9.130858,38.725038],[-9.130468,38.725679],[-9.130372,38.725959],[-9.130301,38.726164],[-9.130261,38.726311],[-9.130243,38.726377],[-9.130224,38.726446],[-9.130333,38.72682],[-9.130336,38.726827],[-9.130457,38.727187],[-9.130511,38.727372],[-9.130559,38.727563],[-9.130589,38.727799],[-9.13059,38.727806],[-9.130611,38.727805],[-9.130964,38.727786],[-9.130973,38.727801],[-9.130976,38.727806],[-9.131005,38.727856],[-9.131116,38.728095],[-9.131162,38.728174],[-9.131227,38.728214],[-9.131284,38.72823],[-9.131366,38.728241],[-9.13143,38.728241],[-9.131621,38.728208],[-9.131763,38.728196],[-9.131899,38.728194],[-9.132041,38.728211],[-9.132157,38.728255],[-9.132278,38.728323],[-9.132297,38.728333],[-9.13248,38.728469],[-9.132612,38.728574],[-9.132684,38.728585],[-9.132694,38.728587],[-9.132702,38.728583],[-9.132748,38.728561],[-9.132793,38.728539],[-9.132803,38.728538],[-9.13284,38.728591],[-9.132884,38.728572],[-9.133418,38.728346],[-9.133512,38.728324],[-9.133659,38.728289],[-9.133911,38.728276],[-9.134027,38.728283],[-9.133995,38.728644],[-9.134303,38.728661],[-9.134335,38.7283],[-9.134589,38.728314],[-9.13488,38.72833],[-9.134776,38.729534],[-9.136217,38.729626],[-9.136182,38.730135],[-9.136191,38.730359],[-9.136246,38.730525],[-9.138186,38.730462],[-9.138748,38.730546]]]}},{"type":"Feature","properties":{"codigo":"038","zona":"Socorro","disticos_residentes":1265,"disticos_familia_numerosa":3,"disticos_total":1268,"N_ALOJAMENTOS_FAM_CLASS_RHABITUAL":2230,"aloj_rhab_ponderado":2230.3,"n_bgri_contrib":47,"Racio":0.57},"geometry":{"type":"Polygon","coordinates":[[[-9.135791,38.723375],[-9.136244,38.723265],[-9.136603,38.723269],[-9.136829,38.723352],[-9.136943,38.72326],[-9.136889,38.723221],[-9.13757,38.722677],[-9.137629,38.722727],[-9.13791,38.722522],[-9.138234,38.722306],[-9.138198,38.722271],[-9.13833,38.722187],[-9.13865,38.722231],[-9.139073,38.722022],[-9.139337,38.722042],[-9.139435,38.721271],[-9.139315,38.720651],[-9.13972,38.72038],[-9.13982,38.720312],[-9.14026,38.720164],[-9.140349,38.720207],[-9.140454,38.720257],[-9.141348,38.720268],[-9.141815,38.720572],[-9.141968,38.720331],[-9.141901,38.719983],[-9.141932,38.719913],[-9.141959,38.719864],[-9.142369,38.719468],[-9.142878,38.719009],[-9.142767,38.71888],[-9.142387,38.718576],[-9.142302,38.718491],[-9.142026,38.71819],[-9.141833,38.717862],[-9.141815,38.717835],[-9.141656,38.717598],[-9.141553,38.717455],[-9.141433,38.717304],[-9.141253,38.717093],[-9.140838,38.716664],[-9.140342,38.716159],[-9.140294,38.716111],[-9.139785,38.715558],[-9.139664,38.715408],[-9.139596,38.715304],[-9.139435,38.715083],[-9.138997,38.715237],[-9.138976,38.715244],[-9.138984,38.71518],[-9.138569,38.715123],[-9.138414,38.715108],[-9.138391,38.715106],[-9.138396,38.715021],[-9.138239,38.715024],[-9.138114,38.714986],[-9.137756,38.71484],[-9.137315,38.715178],[-9.137072,38.715071],[-9.136149,38.714775],[-9.135788,38.715509],[-9.135786,38.715775],[-9.135331,38.716729],[-9.135004,38.716611],[-9.134944,38.716742],[-9.13495,38.716843],[-9.134951,38.717018],[-9.134924,38.717201],[-9.134842,38.71754],[-9.134844,38.717674],[-9.134898,38.71793],[-9.13494,38.718028],[-9.134972,38.71869],[-9.134921,38.719293],[-9.134936,38.71942],[-9.134932,38.720041],[-9.134932,38.720042],[-9.134888,38.720274],[-9.134803,38.720522],[-9.134764,38.720608],[-9.134683,38.720751],[-9.134658,38.720928],[-9.134668,38.72104],[-9.134619,38.721039],[-9.134503,38.72103],[-9.134399,38.721017],[-9.134332,38.721006],[-9.134311,38.721002],[-9.134301,38.720998],[-9.134297,38.720996],[-9.134292,38.720991],[-9.134291,38.720987],[-9.134289,38.720977],[-9.134289,38.720963],[-9.134289,38.720952],[-9.13429,38.720946],[-9.134291,38.720942],[-9.134292,38.720939],[-9.134299,38.720925],[-9.134303,38.720918],[-9.134264,38.720904],[-9.134218,38.720983],[-9.134083,38.720949],[-9.13373,38.720867],[-9.133709,38.720897],[-9.133477,38.721241],[-9.133403,38.72121],[-9.133432,38.721108],[-9.13313,38.720981],[-9.13281,38.721458],[-9.133142,38.721595],[-9.132654,38.722308],[-9.132574,38.722399],[-9.133262,38.72245],[-9.135003,38.722571],[-9.135183,38.722648],[-9.135452,38.722763],[-9.135462,38.722778],[-9.135664,38.723084],[-9.135702,38.723154],[-9.135791,38.723375]]]}},{"type":"Feature","properties":{"codigo":"050","zona":"Mouraria","disticos_residentes":285,"disticos_familia_numerosa":0,"disticos_total":285,"N_ALOJAMENTOS_FAM_CLASS_RHABITUAL":734,"aloj_rhab_ponderado":734.4,"n_bgri_contrib":15,"Racio":0.39},"geometry":{"type":"Polygon","coordinates":[[[-9.133432,38.721108],[-9.133403,38.72121],[-9.133477,38.721241],[-9.133709,38.720897],[-9.13373,38.720867],[-9.134083,38.720949],[-9.134218,38.720983],[-9.134264,38.720904],[-9.134303,38.720918],[-9.134299,38.720925],[-9.134292,38.720939],[-9.134291,38.720942],[-9.13429,38.720946],[-9.134289,38.720952],[-9.134289,38.720963],[-9.134289,38.720977],[-9.134291,38.720987],[-9.134292,38.720991],[-9.134297,38.720996],[-9.134301,38.720998],[-9.134311,38.721002],[-9.134332,38.721006],[-9.134399,38.721017],[-9.134503,38.72103],[-9.134619,38.721039],[-9.134668,38.72104],[-9.134658,38.720928],[-9.134683,38.720751],[-9.134764,38.720608],[-9.134803,38.720522],[-9.134888,38.720274],[-9.134932,38.720042],[-9.134932,38.720041],[-9.134936,38.71942],[-9.134921,38.719293],[-9.134972,38.71869],[-9.13494,38.718028],[-9.134898,38.71793],[-9.134844,38.717674],[-9.134842,38.71754],[-9.134924,38.717201],[-9.134951,38.717018],[-9.13495,38.716843],[-9.134944,38.716742],[-9.135004,38.716611],[-9.134728,38.716475],[-9.134244,38.716291],[-9.134163,38.71626],[-9.133985,38.716193],[-9.133802,38.716153],[-9.133236,38.71606],[-9.133209,38.716067],[-9.133153,38.716083],[-9.133223,38.716131],[-9.133213,38.716141],[-9.133182,38.716174],[-9.133177,38.716179],[-9.133175,38.716182],[-9.133174,38.716187],[-9.133175,38.71619],[-9.133177,38.716195],[-9.133181,38.716197],[-9.133185,38.716199],[-9.133195,38.7162],[-9.133212,38.716202],[-9.133247,38.716205],[-9.133292,38.716219],[-9.133348,38.716234],[-9.133399,38.716245],[-9.13339,38.716279],[-9.133355,38.71634],[-9.133349,38.716347],[-9.133307,38.716398],[-9.133234,38.716465],[-9.13319,38.716506],[-9.133103,38.716602],[-9.133065,38.716613],[-9.133036,38.716631],[-9.132894,38.71678],[-9.132919,38.716792],[-9.132771,38.716938],[-9.132825,38.716971],[-9.132807,38.716987],[-9.132738,38.716938],[-9.132661,38.717014],[-9.132628,38.717034],[-9.132632,38.717041],[-9.132903,38.71729],[-9.132921,38.717302],[-9.133384,38.717617],[-9.133408,38.717637],[-9.133445,38.717667],[-9.133496,38.717707],[-9.133631,38.717815],[-9.133669,38.717845],[-9.133895,38.718044],[-9.134038,38.718165],[-9.134052,38.718188],[-9.134057,38.718197],[-9.134061,38.718203],[-9.134067,38.718214],[-9.134107,38.718281],[-9.13411,38.718287],[-9.134214,38.718539],[-9.134252,38.718824],[-9.134265,38.718872],[-9.134283,38.718939],[-9.134284,38.718946],[-9.134275,38.718946],[-9.13387,38.718974],[-9.133859,38.718975],[-9.133849,38.718964],[-9.133838,38.718953],[-9.133733,38.718839],[-9.13363,38.718728],[-9.133619,38.718716],[-9.13339,38.718921],[-9.133438,38.718952],[-9.133485,38.719101],[-9.133494,38.719129],[-9.133472,38.719134],[-9.133478,38.719207],[-9.133485,38.719292],[-9.133473,38.719405],[-9.133428,38.719513],[-9.133353,38.719618],[-9.133185,38.719849],[-9.133113,38.719927],[-9.133434,38.719941],[-9.133725,38.719953],[-9.133724,38.719987],[-9.134036,38.72],[-9.134037,38.719966],[-9.134054,38.719965],[-9.134074,38.719963],[-9.134088,38.719959],[-9.134102,38.719955],[-9.134129,38.719947],[-9.134148,38.71994],[-9.13417,38.71993],[-9.134188,38.719922],[-9.134319,38.719935],[-9.134317,38.719995],[-9.134204,38.720161],[-9.134104,38.720254],[-9.134021,38.72036],[-9.13398,38.720414],[-9.1339,38.720522],[-9.133731,38.720755],[-9.133643,38.720873],[-9.133604,38.720856],[-9.133432,38.721108]]]}}]};
+
+/* ── PASSEIO ── */
+var wBand='mid', comfortChecked=false;
+var wBase={narrow:25,mid:15,wide:5};
+function getWPts(){ return wBase[wBand]+(comfortChecked?10:0); }
+
+function pickW(idx,band){
+  [0,1,2].forEach(function(i){
+    document.getElementById('ro'+i).classList.remove('active');
+    document.getElementById('pw'+i).checked=false;
+  });
+  document.getElementById('ro'+idx).classList.add('active');
+  document.getElementById('pw'+idx).checked=true;
+  wBand=band;
+  refreshRoPts(); update();
+}
+function toggleComfort(){
+  var chk=document.getElementById('chk-comfort');
+  chk.checked=!chk.checked; comfortChecked=chk.checked;
+  document.getElementById('cbox').classList.toggle('ticked',comfortChecked);
+  refreshRoPts(); update();
+}
+function refreshRoPts(){
+  document.getElementById('rp0').textContent=(comfortChecked&&wBand==='narrow')?'35 pts':'25 pts';
+  document.getElementById('rp1').textContent=(comfortChecked&&wBand==='mid')?'25 pts':'15 pts';
+  document.getElementById('rp2').textContent=(comfortChecked&&wBand==='wide')?'15 pts':'5 pts';
+}
+
+/* ── CATEGORIES ── */
+function getCategory(t){
+  if(t>=75) return {letter:'A',cls:'cat-A',color:'#0F6E56',name:'Muito provável',desc:'Os dados indicam condições muito favoráveis e baixa probabilidade de impacto significativo. A equipa técnica poderá confirmar com uma visita sumária ao local.'};
+  if(t>=55) return {letter:'B',cls:'cat-B',color:'#3B6D11',name:'Provável',desc:'Os dados indicam condições favoráveis e impacto moderado e controlável. Recomenda-se visita de confirmação ao local antes da decisão.'};
+  if(t>=35) return {letter:'C',cls:'cat-C',color:'#854F0B',name:'Requer análise rigorosa',desc:'Os dados apresentam condicionantes que não permitem avaliação segura à distância. A equipa técnica deve realizar análise presencial antes de qualquer decisão.'};
+  return {letter:'D',cls:'cat-D',color:'#A32D2D',name:'Difícil',desc:'Os dados indicam condições desfavoráveis, com elevada probabilidade de impacto nos residentes e/ou estacionamento. Requer justificação reforçada.'};
+}
+
+function update(){
+  var h=parseInt(document.getElementById('sel-h').value);
+  var p=parseInt(document.getElementById('sel-p').value);
+  var w=getWPts(), total=h+p+w;
+  document.getElementById('r-h').textContent=h;
+  document.getElementById('r-p').textContent=p;
+  document.getElementById('r-w').textContent=w;
+  var cat=getCategory(total);
+  document.getElementById('cat-display').className='cat-display '+cat.cls;
+  document.getElementById('cd-letter').textContent=cat.letter;
+  document.getElementById('cd-name').textContent=cat.name;
+  document.getElementById('cd-desc').textContent=cat.desc;
+  document.getElementById('cd-score').textContent='Pontuação: '+total+' / 110';
+  var pf=document.getElementById('pfill');
+  pf.style.width=Math.min(100,Math.round(total/110*100))+'%';
+  pf.style.background=cat.color;
+}
+
+/* ── MAP ── */
+function racioColor(r){
+  if(r<=0.4) return '#0F6E56';
+  if(r<=0.6) return '#3B6D11';
+  if(r<=0.8) return '#C07A1A';
+  return '#A32D2D';
+}
+function racioVal(r){
+  if(r<=0.4) return '25';
+  if(r<=0.6) return '15';
+  if(r<=0.8) return '8';
+  return '0';
+}
+
+var map=L.map('map').setView([38.727,-9.136],14);
+
+L.tileLayer('https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',{
+  attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  maxZoom:19
+}).addTo(map);
+
+var selectedLayer=null;
+
+var geoLayer=L.geoJSON(GEOJSON,{
+  style:function(f){
+    var c=racioColor(f.properties.Racio);
+    return {color:c,weight:2,opacity:0.9,fillColor:c,fillOpacity:0.3};
+  },
+  onEachFeature:function(f,layer){
+    var p=f.properties;
+    var catLabel=p.Racio<=0.4?'≤ 0,4 — muito baixa':p.Racio<=0.6?'0,4–0,6 — moderada':p.Racio<=0.8?'0,6–0,8 — elevada':'> 0,8 — crítica';
+
+    layer.bindTooltip(
+      '<strong>'+p.zona+'</strong><br>'+
+      'Rácio: <strong>'+p.Racio+'</strong> · '+catLabel+'<br>'+
+      'Dísticos: '+p.disticos_total+' · Alojamentos: '+p.N_ALOJAMENTOS_FAM_CLASS_RHABITUAL,
+      {sticky:true, className:'leaflet-tooltip'}
+    );
+
+    layer.on('click',function(){
+      if(selectedLayer){
+        geoLayer.resetStyle(selectedLayer);
+      }
+      selectedLayer=layer;
+      layer.setStyle({weight:3,fillOpacity:0.65,opacity:1});
+      layer.bringToFront();
+
+      document.getElementById('sel-p').value=racioVal(p.Racio);
+
+      var msi=document.getElementById('msi');
+      msi.style.display='block';
+      msi.innerHTML='📍 Zona selecionada: <span class="msi-name">'+p.zona+'</span> &nbsp;·&nbsp; Rácio: <span class="msi-racio">'+p.Racio+'</span> &nbsp;·&nbsp; Pressão: '+catLabel;
+
+      update();
+    });
+
+    layer.on('mouseover',function(){ if(layer!==selectedLayer) layer.setStyle({fillOpacity:0.55}); });
+    layer.on('mouseout',function(){ if(layer!==selectedLayer) geoLayer.resetStyle(layer); });
+  }
+}).addTo(map);
+
+map.fitBounds(geoLayer.getBounds(),{padding:[12,12]});
+update();
+</script>
+</body>
+</html>
