@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adote um Pequeno Jardim | Junta de Freguesia de Arroios</title>
+<meta name="description" content="Rede de Jardins e Hortas Urbanas de Arroios: consulte o regulamento, descubra no mapa interativo os espaços verdes disponíveis e candidate-se a cuidar de um pequeno jardim perto de si.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23069668'/%3E%3Cpath d='M12 20c0-6 3-8 6-9-1 5-3 8-6 9Z' fill='%23fff'/%3E%3Cpath d='M12 20c0-7-3-10-7-11 0 6 3 10 7 11Z' fill='%23fff' opacity='.85'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="assets/vendor/markercluster/MarkerCluster.css">
+<link rel="stylesheet" href="assets/vendor/markercluster/MarkerCluster.Default.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<!-- ====================== HEADER ====================== -->
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="#inicio">
+      <span class="brand-logo">
+        <img src="assets/img/logo-jfa.png" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+        <span class="fallback" style="display:none">JFA</span>
+      </span>
+      <span class="brand-text">
+        <strong>Junta de Freguesia de Arroios</strong>
+        <span>Rede de Jardins e Hortas Urbanas</span>
+      </span>
+    </a>
+    <button class="nav-toggle" aria-label="Abrir menu" aria-expanded="false">
+      <svg class="icon" viewBox="0 0 24 24" width="20" height="20"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <nav class="main-nav">
+      <a href="#inicio">Início</a>
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#mapa">Mapa</a>
+      <a href="#regras">Regras</a>
+      <a href="#candidatura">Candidatura</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://jfarroios.pt/wp-content/uploads/2026/08/Regulamento-de-Atribuicao-de-Pequenos-Jardins-e-Hortas-Urbanas-de-Arroios-1.pdf" target="_blank" rel="noopener">Regulamento&nbsp;↗</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ====================== HERO ====================== -->
+<section class="hero" id="inicio">
+  <div class="wrap">
+    <span class="hero-eyebrow">
+      <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><path d="M12 21c0-8 4-11 8-12-1 7-4 11-8 12Z"/><path d="M12 21c0-9-4-13-9-14 0 8 4 13 9 14Z"/></svg>
+      Programa de Pequenos Jardins e Hortas Urbanas
+    </span>
+    <h1>Adote um pequeno jardim em Arroios.</h1>
+    <p class="hero-lead">A Junta de Freguesia de Arroios criou a Rede de Jardins e Hortas Urbanas de Arroios, uma iniciativa que permite à comunidade participar diretamente no cuidado e valorização de pequenos espaços verdes da freguesia — um canteiro, uma caldeira ou um pequeno espaço verde perto de casa, do trabalho ou da escola.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#mapa">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M9 20l-5-2V4l5 2 6-2 5 2v14l-5-2-6 2z"/><path d="M9 6v14M15 4v14"/></svg>
+        Consultar mapa e espaços disponíveis
+      </a>
+      <a class="btn btn-outline-invert" href="https://jfarroios.pt/wp-content/uploads/2026/08/Regulamento-de-Atribuicao-de-Pequenos-Jardins-e-Hortas-Urbanas-de-Arroios-1.pdf" target="_blank" rel="noopener">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg>
+        Ler o regulamento
+      </a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><b data-summary="total">…</b><span>espaços na rede</span></div>
+      <div class="hero-stat"><b data-summary="Disponível">…</b><span>disponíveis para candidatura</span></div>
+      <div class="hero-stat"><b data-summary="Atribuído">…</b><span>já atribuídos</span></div>
+      <div class="hero-stat"><b data-summary="Pedido em Análise">…</b><span>pedidos em análise</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== COMO FUNCIONA ====================== -->
+<section id="como-funciona">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">Como funciona</span>
+      <h2>Um espaço verde, cuidado por si</h2>
+      <p>Através deste programa, é possível candidatar-se à utilização de um pequeno jardim urbano e assumir o compromisso de cuidar e manter esse espaço, de acordo com as regras definidas no Regulamento de Atribuição de Pequenos Jardins e Hortas Urbanas de Arroios.</p>
+    </div>
+    <div class="prose">
+      <p>Assim, um canteiro, uma caldeira ou um pequeno espaço verde perto de casa, do trabalho ou da escola pode tornar-se num lugar mais próximo da comunidade, fomentando o contacto das pessoas com a natureza e a valorização desta última por parte da população.</p>
+    </div>
+    <div class="pillars">
+      <div class="pillar">
+        <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="22" height="22"><path d="M12 21c0-8 4-11 8-12-1 7-4 11-8 12Z"/><path d="M12 21c0-9-4-13-9-14 0 8 4 13 9 14Z"/></svg></span>
+        <h3>Um espaço perto de si</h3>
+        <p>Canteiros, caldeiras e pequenas áreas verdes distribuídos por toda a freguesia, prontos para receber quem se queira dedicar a eles.</p>
+      </div>
+      <div class="pillar">
+        <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="22" height="22"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M14 14.2c2.6.3 4.5 2.3 4.5 5.3"/></svg></span>
+        <h3>Espírito comunitário</h3>
+        <p>Fomenta o contacto entre vizinhos, a educação ambiental e a ocupação saudável dos tempos livres.</p>
+      </div>
+      <div class="pillar">
+        <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="9"/><path d="M8 12l2.5 2.5L16 9"/></svg></span>
+        <h3>Jardinagem responsável</h3>
+        <p>Sem pesticidas nem herbicidas químicos, com espécies adequadas ao clima de Lisboa e apoio técnico da Junta de Freguesia.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== DESTINATÁRIOS ====================== -->
+<section id="quem-pode" class="bg-alt">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">Destinatários</span>
+      <h2>Quem se pode candidatar?</h2>
+      <p>Podem apresentar candidatura à utilização de um pequeno jardim ou horta urbana:</p>
+    </div>
+    <div class="eligibility">
+      <div class="elig-card">
+        <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></span>
+        <h3>Pessoas singulares</h3>
+        <p>Maiores de idade que, na Freguesia de Arroios:</p>
+        <ul>
+          <li>residam;</li>
+          <li>estejam recenseadas;</li>
+          <li>trabalhem; ou</li>
+          <li>estudem.</li>
+        </ul>
+      </div>
+      <div class="elig-card">
+        <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="22" height="22"><rect x="4" y="10" width="16" height="10" rx="1"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg></span>
+        <h3>Pessoas coletivas sem fins lucrativos</h3>
+        <p>Associações, cooperativas, fundações, IPSS e outras entidades da economia social com fins de interesse público, ambiental, social, educativo ou comunitário.</p>
+      </div>
+    </div>
+    <p class="elig-note">
+      <svg class="icon" viewBox="0 0 24 24" width="15" height="15" style="margin-right:6px"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>
+      Não são elegíveis as pessoas interessadas que tenham dívidas vencidas e não pagas à Junta de Freguesia. A candidatura implica a aceitação integral do Regulamento.
+    </p>
+  </div>
+</section>
+
+<!-- ====================== MAPA ====================== -->
+<section id="mapa">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">Mapa interativo</span>
+      <h2>Descubra os espaços da rede</h2>
+      <p>Nesta primeira fase, existem espaços distribuídos por diferentes pontos da freguesia. Explore o mapa, filtre por estado ou tipo de espaço e clique num ponto para ver os detalhes.</p>
+    </div>
+
+    <div class="map-toolbar">
+      <label class="search-field">
+        <svg class="icon" viewBox="0 0 24 24" width="16" height="16"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" id="mapSearch" placeholder="Procurar por morada ou nome…">
+      </label>
+      <div class="legend-toggles">
+        <button class="legend-chip" type="button" data-status="disponivel" data-active="true"><span class="dot" style="background:#069668"></span>Disponível</button>
+        <button class="legend-chip" type="button" data-status="atribuido" data-active="true"><span class="dot" style="background:#72b8f5"></span>Atribuído</button>
+        <button class="legend-chip" type="button" data-status="pedido" data-active="true"><span class="dot" style="background:#ffc760"></span>Pedido em Análise</button>
+        <button class="legend-chip" type="button" id="boundaryToggle" data-active="true"><span class="dash"></span>Limite de Arroios</button>
+      </div>
+      <select class="type-select" id="typeFilter" aria-label="Filtrar por tipo de espaço">
+        <option value="">Todos os tipos</option>
+        <option value="Canteiro">Canteiro</option>
+        <option value="Caldeira">Caldeira</option>
+        <option value="Floreira">Floreira</option>
+        <option value="Espaço verde">Espaço verde</option>
+        <option value="Outra">Outra</option>
+        <option value="Não identificada">Não identificada</option>
+      </select>
+    </div>
+
+    <div class="map-shell">
+      <div id="map"></div>
+
+      <!-- painel de detalhe: encaixado no desktop, sobreposto no telemóvel -->
+      <aside class="detail-panel" id="detailPanel" data-empty="true" aria-live="polite">
+        <div class="detail-placeholder">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+          <p>Selecione um espaço no mapa para ver os detalhes.</p>
+        </div>
+        <div class="detail-content">
+          <div class="detail-head">
+            <span class="detail-status" id="dStatus"></span>
+            <button class="detail-close" id="detailClose" aria-label="Fechar">
+              <svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <div class="detail-body">
+            <h3 id="dTitle">—</h3>
+            <p class="detail-sub" id="dSub">—</p>
+
+            <div class="detail-rows">
+              <div class="detail-row">
+                <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+                <div class="txt"><label>Morada</label><div id="dAddress">—</div></div>
+              </div>
+              <div class="detail-row">
+                <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M12 21c0-8 4-11 8-12-1 7-4 11-8 12Z"/><path d="M12 21c0-9-4-13-9-14 0 8 4 13 9 14Z"/></svg></span>
+                <div class="txt"><label>Tipo de espaço</label><div id="dTipologia">—</div></div>
+              </div>
+              <div class="detail-row">
+                <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></span>
+                <div class="txt"><label>Gestão</label><div id="dGestao">—</div></div>
+              </div>
+            </div>
+
+            <div class="responsible-box" id="dResponsavel"></div>
+
+            <div class="detail-cta" id="dCta"></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="map-summary">
+      <div class="summary-pill"><span class="dot" style="background:#069668"></span><b data-summary="Disponível">…</b> disponíveis</div>
+      <div class="summary-pill"><span class="dot" style="background:#72b8f5"></span><b data-summary="Atribuído">…</b> atribuídos</div>
+      <div class="summary-pill"><span class="dot" style="background:#ffc760"></span><b data-summary="Pedido em Análise">…</b> em análise</div>
+      <div class="summary-pill"><span class="dot" style="background:#566661"></span><b data-summary="total">…</b> no total</div>
+    </div>
+
+    <p class="map-note">
+      <svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>
+      <span>Este mapa reúne o levantamento de pequenos espaços verdes da freguesia. Os estados de atribuição apresentados nesta versão são <strong>ilustrativos</strong>, para fins de demonstração, e serão substituídos por dados reais à medida que o programa avance.</span>
+    </p>
+  </div>
+</section>
+
+<!-- painel de detalhe do ponto (mapa) -->
+<div class="detail-backdrop" id="detailBackdrop"></div>
+<aside class="detail-panel" id="detailPanel" aria-hidden="true">
+  <div class="detail-head">
+    <div>
+      <span class="detail-status" id="dStatus"></span>
+    </div>
+    <button class="detail-close" id="detailClose" aria-label="Fechar">
+      <svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="detail-body">
+    <h3 id="dTitle">—</h3>
+    <p class="detail-sub" id="dSub">—</p>
+
+    <div class="detail-rows">
+      <div class="detail-row">
+        <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+        <div class="txt"><label>Morada</label><div id="dAddress">—</div></div>
+      </div>
+      <div class="detail-row">
+        <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M12 21c0-8 4-11 8-12-1 7-4 11-8 12Z"/><path d="M12 21c0-9-4-13-9-14 0 8 4 13 9 14Z"/></svg></span>
+        <div class="txt"><label>Tipo de espaço</label><div id="dTipologia">—</div></div>
+      </div>
+      <div class="detail-row">
+        <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></span>
+        <div class="txt"><label>Gestão</label><div id="dGestao">—</div></div>
+      </div>
+    </div>
+
+    <div class="responsible-box" id="dResponsavel"></div>
+
+    <div class="detail-cta" id="dCta"></div>
+  </div>
+</aside>
+
+<!-- ====================== REGRAS ====================== -->
+<section id="regras" class="bg-alt">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">Regras simples</span>
+      <h2>O que implica cuidar de um pequeno jardim?</h2>
+      <p>Quem recebe um espaço compromete-se a cuidar dele regularmente, mantê-lo limpo, seguro e em boas condições, e a utilizar a água de forma responsável. Consulte de forma simples os principais direitos, deveres e proibições — o detalhe completo está no Regulamento.</p>
+    </div>
+
+    <div class="rules-tabs" role="tablist">
+      <button class="rules-tab" role="tab" aria-selected="true" data-tab="direitos">Direitos</button>
+      <button class="rules-tab" role="tab" aria-selected="false" data-tab="deveres">Deveres</button>
+      <button class="rules-tab" role="tab" aria-selected="false" data-tab="proibicoes">Proibições</button>
+    </div>
+
+    <div class="rules-panel is-active" data-panel="direitos">
+      <div class="rule-grid">
+        <div class="rule-card">
+          <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg></span>
+          <p><strong>Água, quando disponível.</strong> Acesso a uma tomada de água pública sempre que exista no local, a usar de forma consciente. Onde não haja fornecimento, a rega deve ser assegurada pela pessoa utilizadora.</p>
+        </div>
+        <div class="rule-card">
+          <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><path d="M12 2l3 6 6 1-4.5 4 1 6L12 16l-5.5 3 1-6L3 9l6-1z"/></svg></span>
+          <p><strong>Apoio técnico.</strong> Informação e acompanhamento técnico da Junta de Freguesia, incluindo plantas e arbustos nos espaços que precisem de plantação inicial.</p>
+        </div>
+        <div class="rule-card">
+          <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg></span>
+          <p><strong>Compostor.</strong> Acesso a um compostor quando disponibilizado, com utilização obrigatória para os resíduos vegetais produzidos.</p>
+        </div>
+        <div class="rule-card">
+          <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 10h8M8 14h5"/></svg></span>
+          <p><strong>Identificação.</strong> O jardim é identificado com uma placa da Junta de Freguesia de Arroios.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="rules-panel" data-panel="deveres">
+      <div class="rule-grid">
+        <div class="rule-card">
+          <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="9"/><path d="M8 12l2.5 2.5L16 9"/></svg></span>
+          <p><strong>Cuidar sem interrupção.</strong> Iniciar o cuidado do jardim em até 10 dias úteis e cultivá-lo de forma contínua (a doença, devidamente comunicada, justifica interrupções).</p>
+        </div>
+        <div class="rule-card">
+          <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg></span>
+          <p><strong>Uso racional da água.</strong> Regar de forma prudente e adequada a cada espécie, evitando desperdícios; são permitidos sistemas de rega automática.</p>
+        </div>
+        <div class="rule-card">
+          <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><path d="M12 21c0-8 4-11 8-12-1 7-4 11-8 12Z"/><path d="M12 21c0-9-4-13-9-14 0 8 4 13 9 14Z"/></svg></span>
+          <p><strong>Espécies adequadas.</strong> Escolher plantas adaptadas ao clima de Lisboa, excluindo espécies invasoras ou infestantes.</p>
+        </div>
+        <div class="rule-card">
+          <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>
+          <p><strong>Limpeza e segurança.</strong> Manter o espaço e os acessos comuns limpos, seguros e em bom estado, respeitando a boa convivência social.</p>
+        </div>
+        <div class="rule-card">
+          <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><path d="M4 7h16M4 12h16M4 17h10"/></svg></span>
+          <p><strong>Resíduos.</strong> Garantir o correto encaminhamento de todos os resíduos, verdes ou não.</p>
+        </div>
+        <div class="rule-card">
+          <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M14 14.2c2.6.3 4.5 2.3 4.5 5.3"/></svg></span>
+          <p><strong>Formação e fiscalização.</strong> Frequentar ações de formação obrigatórias e não obstruir a fiscalização da Junta de Freguesia.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="rules-panel" data-panel="proibicoes">
+      <div class="rule-grid">
+        <div class="rule-card">
+          <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/></svg></span>
+          <p><strong>Pesticidas e herbicidas químicos.</strong> Não é permitida a utilização de químicos de síntese, plantas OGM nem espécies invasoras.</p>
+        </div>
+        <div class="rule-card">
+          <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/></svg></span>
+          <p><strong>Construções não autorizadas.</strong> Sem autorização prévia da Junta, não é permitido construir, vedar ou instalar estufas e abrigos móveis.</p>
+        </div>
+        <div class="rule-card">
+          <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/></svg></span>
+          <p><strong>Animais.</strong> Não é permitido manter animais domésticos no espaço (exceto o cuidado devido a colónias de gatos errantes já existentes).</p>
+        </div>
+        <div class="rule-card">
+          <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/></svg></span>
+          <p><strong>Ceder o espaço.</strong> O jardim atribuído não pode ser cedido a terceiros, sob qualquer forma ou título.</p>
+        </div>
+        <div class="rule-card">
+          <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/></svg></span>
+          <p><strong>Alfaias motorizadas e fogo.</strong> Não são permitidos motocultivadores, motoenxadas ou qualquer atividade com fogo.</p>
+        </div>
+        <div class="rule-card">
+          <span class="ico"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/></svg></span>
+          <p><strong>Espécies de grande porte.</strong> Plantar árvores ou arbustos de grande porte exige autorização prévia por escrito.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="meta-cards">
+      <div class="meta-card">
+        <div class="big">1 ano</div>
+        <div class="lbl">Duração da cedência de Pequenos Jardins Urbanos, renovável mediante avaliação positiva (até 5 anos para Hortas Urbanas Comunitárias)</div>
+      </div>
+      <div class="meta-card">
+        <div class="big">Isento</div>
+        <div class="lbl">de taxas para Pequenos Jardins Urbanos — utilização gratuita</div>
+      </div>
+      <div class="meta-card">
+        <div class="big">10 dias</div>
+        <div class="lbl">úteis para iniciar o cuidado do espaço após a atribuição</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== CANDIDATURA ====================== -->
+<section id="candidatura">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">Candidatura</span>
+      <h2>Como apresentar candidatura</h2>
+      <p>Consulte o mapa interativo, escolha um dos espaços disponíveis e apresente a sua candidatura através do formulário online.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <h4>Consulte o mapa</h4>
+        <p>Explore o mapa interativo e identifique um espaço marcado como <strong>Disponível</strong>.</p>
+      </div>
+      <div class="step">
+        <h4>Confirme se é elegível</h4>
+        <p>Verifique se cumpre os requisitos da secção "Quem se pode candidatar?".</p>
+      </div>
+      <div class="step">
+        <h4>Submeta a candidatura</h4>
+        <p>Preencha o formulário online dentro do prazo do aviso de abertura do procedimento (60 dias consecutivos).</p>
+      </div>
+      <div class="step">
+        <h4>Aguarde a decisão</h4>
+        <p>Havendo mais do que uma candidatura elegível para o mesmo local, aplicam-se os critérios de seleção definidos no Regulamento e no aviso de abertura.</p>
+      </div>
+    </div>
+
+    <div class="candidatura-actions">
+      <a class="btn btn-primary" href="#mapa">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M9 20l-5-2V4l5 2 6-2 5 2v14l-5-2-6 2z"/><path d="M9 6v14M15 4v14"/></svg>
+        Consultar mapa e espaços disponíveis
+      </a>
+      <a class="btn btn-ghost is-soon" href="#candidatura" onclick="event.preventDefault(); alert('O formulário de candidatura online estará disponível brevemente. Para já, contacte a Junta de Freguesia de Arroios através do site institucional jfarroios.pt.');">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 4l8 8 8-8"/></svg>
+        Apresentar candidatura <span class="tag-soon">Brevemente</span>
+      </a>
+    </div>
+    <p class="candidatura-note">Consulte também o <a href="https://jfarroios.pt/wp-content/uploads/2026/08/Regulamento-de-Atribuicao-de-Pequenos-Jardins-e-Hortas-Urbanas-de-Arroios-1.pdf" target="_blank" rel="noopener">Regulamento de Atribuição de Pequenos Jardins e Hortas Urbanas de Arroios</a> para conhecer todas as condições de participação.</p>
+  </div>
+</section>
+
+<!-- ====================== FAQ ====================== -->
+<section id="faq" class="bg-alt">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">Perguntas frequentes</span>
+      <h2>Ainda tem dúvidas?</h2>
+    </div>
+    <div class="faq-list">
+
+      <div class="faq-item" data-open="true">
+        <button class="faq-q">De onde vem a água para regar?
+          <svg class="icon" viewBox="0 0 24 24" width="16" height="16"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">Sempre que exista uma tomada de água pública no local, a pessoa utilizadora pode aceder a ela, fazendo um uso prudente e racional (são permitidos sistemas de rega automática). Nos espaços sem fornecimento de água no local, a rega deve ser assegurada pela pessoa utilizadora, por exemplo transportando água, escolhendo sempre espécies e técnicas que minimizem o consumo.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">Tenho de pagar alguma taxa?
+          <svg class="icon" viewBox="0 0 24 24" width="16" height="16"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">Não. A utilização de Pequenos Jardins Urbanos está isenta do pagamento de taxas. No caso de Hortas Urbanas Comunitárias, podem aplicar-se taxas nos termos do Regulamento Geral de Taxas do Município de Lisboa, nomeadamente se a produção tiver fins comerciais.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">Durante quanto tempo fico responsável pelo espaço?
+          <svg class="icon" viewBox="0 0 24 24" width="16" height="16"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">A cedência de um Pequeno Jardim Urbano é feita a título precário pelo período de um ano, podendo ser renovada mediante avaliação positiva do cumprimento das regras. Hortas Urbanas Comunitárias podem ser atribuídas por períodos até cinco anos.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">Posso usar pesticidas, herbicidas ou fertilizantes químicos?
+          <svg class="icon" viewBox="0 0 24 24" width="16" height="16"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">Não. A jardinagem deve ser ambientalmente responsável: sem herbicidas ou pesticidas químicos de síntese, sem espécies invasoras e sem variedades geneticamente modificadas.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">O que acontece se eu não cuidar do espaço?
+          <svg class="icon" viewBox="0 0 24 24" width="16" height="16"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">O incumprimento das regras pode levar à cessação da cedência, sem direito a indemnização, e constitui impedimento à candidatura da pessoa utilizadora — e do respetivo agregado familiar — por um período mínimo de três anos.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">Posso ter animais no jardim?
+          <svg class="icon" viewBox="0 0 24 24" width="16" height="16"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">Não é permitido construir instalações para animais domésticos nem manter animais no espaço, sem prejuízo do cuidado devido a colónias de gatos errantes já existentes no local.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">Posso construir uma estufa ou vedação?
+          <svg class="icon" viewBox="0 0 24 24" width="16" height="16"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">Qualquer construção, incluindo vedações ou estufas, exige autorização prévia e expressa da Junta de Freguesia. Excetua-se a instalação de estacaria ou tutores em materiais naturais ou biodegradáveis, necessários ao crescimento de algumas plantas.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">E se houver mais do que uma candidatura para o mesmo espaço?
+          <svg class="icon" viewBox="0 0 24 24" width="16" height="16"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">Aplica-se uma pontuação até 100 pontos, considerando a residência/trabalho/estudo na freguesia (até 20 pontos), experiência prévia em jardinagem ou agricultura urbana (25 pontos) e o contributo comunitário e impacto social do projeto (até 55 pontos). Em caso de empate, é feito sorteio público.</div></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ====================== CTA FINAL ====================== -->
+<div style="padding: 0 0 76px">
+  <div class="cta-banner">
+    <h2>Ajude-nos a cuidar de Arroios, um pequeno jardim de cada vez.</h2>
+    <p>Escolha um espaço no mapa, conheça as regras e junte-se à comunidade que está a transformar canteiros e caldeiras da freguesia em pequenos jardins.</p>
+    <div class="cta-actions">
+      <a class="btn btn-primary" href="#mapa" style="background:#fff;color:var(--green-dark);box-shadow:none">Ver espaços no mapa</a>
+      <a class="btn btn-outline-invert" href="https://jfarroios.pt/wp-content/uploads/2026/08/Regulamento-de-Atribuicao-de-Pequenos-Jardins-e-Hortas-Urbanas-de-Arroios-1.pdf" target="_blank" rel="noopener">Ler o regulamento</a>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== FOOTER ====================== -->
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <div class="footer-brand">
+          <span class="brand-logo">
+            <img src="assets/img/logo-jfa.png" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+            <span class="fallback" style="display:none">JFA</span>
+          </span>
+          <strong style="color:#fff">Junta de Freguesia de Arroios</strong>
+        </div>
+        <p>Rede de Jardins e Hortas Urbanas de Arroios — valorizar o espaço público através da jardinagem comunitária e da educação ambiental.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Navegação</h4>
+        <a href="#como-funciona">Como funciona</a>
+        <a href="#mapa">Mapa interativo</a>
+        <a href="#regras">Regras</a>
+        <a href="#candidatura">Candidatura</a>
+        <a href="#faq">Perguntas frequentes</a>
+      </div>
+      <div class="footer-col">
+        <h4>Documentos &amp; contacto</h4>
+        <a href="https://jfarroios.pt/wp-content/uploads/2026/08/Regulamento-de-Atribuicao-de-Pequenos-Jardins-e-Hortas-Urbanas-de-Arroios-1.pdf" target="_blank" rel="noopener">Regulamento (PDF) ↗</a>
+        <a href="https://jfarroios.pt" target="_blank" rel="noopener">jfarroios.pt ↗</a>
+        <p>Para contactos oficiais, consulte o sítio institucional da Junta de Freguesia de Arroios.</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Junta de Freguesia de Arroios</span>
+      <span>Dados do mapa de demonstração baseados no levantamento de espaços verdes da freguesia · estados de atribuição ilustrativos</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/vendor/leaflet/leaflet.js"></script>
+<script src="assets/vendor/markercluster/leaflet.markercluster.js"></script>
+<script src="assets/data/espacos.js"></script>
+<script src="assets/data/arroios-limite.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
